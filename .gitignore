@@ -47,7 +47,8 @@ local.properties
 [Rr]elease/
 x64/
 build/
-[Bb]in/
+[Bb]in/[Dd]ebug/*.dll
+[Bb]in/[Rr]elease/*.dll
 [Oo]bj/
 
 # MSTest test Results
