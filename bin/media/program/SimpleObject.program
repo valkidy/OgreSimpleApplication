@@ -1,0 +1,66 @@
+vertex_program ObjectSpace_VP hlsl
+{
+	source shader/SimpleObject.cg
+	entry_point object_vp
+	target vs_3_0
+	default_params
+	{	
+		param_named_auto world_matrix projection_matrix
+		param_named_auto camera_position camera_position
+	}
+}
+/*
+vertex_program WorldSpace_VP hlsl
+{
+	source shader/SimpleObject.cg
+	entry_point world_vp
+	target vs_3_0
+	default_params
+	{	
+		param_named_auto world_matrix world_matrix
+	}
+}
+
+vertex_program WorldViewSpace_VP hlsl
+{
+	source shader/SimpleObject.cg
+	entry_point worldview_vp
+	target vs_3_0
+	default_params
+	{	
+		param_named_auto worldview_matrix worldview_matrix
+	}
+}
+
+vertex_program WorldViewProjSpace_VP hlsl
+{
+	source shader/SimpleObject.cg
+	entry_point worldviewproj_vp
+	target vs_3_0
+	default_params
+	{	
+		param_named_auto worldviewproj_matrix worldviewproj_matrix
+	}
+}
+
+vertex_program ObjectSpace_VP hlsl
+{
+	source shader/SimpleObject.cg
+	entry_point object_vp
+	target vs_3_0
+	default_params
+	{	
+	}
+}
+*/
+
+fragment_program ObjectVertexColor_FP hlsl
+{
+	source shader/SimpleObject.cg
+	entry_point objectvertex_fp
+	target ps_3_0
+	default_params
+	{
+	}
+}
+

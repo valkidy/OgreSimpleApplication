@@ -1,0 +1,41 @@
+//-----------------------------------------------------------------------------
+//                         PROGRAM DEPENDENCIES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//                         GLOBAL Defination
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Function Name: main_vp
+// Function Desc: Vertex Program Entry point
+//-----------------------------------------------------------------------------
+void object_vp(
+	// Vertex Inputs
+	in float4 iPosition		: POSITION,
+	in float2 iUV			: TEXCOORD0,	
+	// Vertex Outputs
+	out float4 oPosition 	: POSITION,
+	out float2 oUV			: TEXCOORD0,
+	// User parameter
+	uniform float4x4	world_matrix,
+	uniform float3 		camera_position)
+{
+	oPosition = mul(world_matrix, iPosition);
+	//oPosition = 0.05 * iPosition;
+	
+	oUV = iUV;
+}
+
+//-----------------------------------------------------------------------------
+// Function Name: main_fp
+// Function Desc: Pixel Program Entry point
+//-----------------------------------------------------------------------------
+void objectvertex_fp(
+	// Pixel Inputs
+	in float2 iUV		: TEXCOORD0,	
+	// Pixel Outputs
+    out float4 oColor	: COLOR,
+	uniform sampler2D tex0 : register(s0))
+{	
+	oColor = float4(1.0, 0.0, 0.0 ,1.0);
+	//oColor = tex2D(tex0, iUV);
+}

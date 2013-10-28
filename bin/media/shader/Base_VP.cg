@@ -1,0 +1,61 @@
+//-----------------------------------------------------------------------------
+//                         PROGRAM DEPENDENCIES
+//-----------------------------------------------------------------------------
+#include "shader/CoreLib/FFPLib_Lighting.hlsl"
+#include "shader/CoreLib/FFPLib_Fog.hlsl"
+//-----------------------------------------------------------------------------
+//                         GLOBAL Defination
+//-----------------------------------------------------------------------------
+#define MAX_LIGHTS 4
+//-----------------------------------------------------------------------------
+// Function Name: main_vp
+// Function Desc: Vertex Program Entry point
+//-----------------------------------------------------------------------------
+void main_vp(
+	// Vertex Inputs
+	in float4 iPosition		: POSITION,
+	in float2 iUV			: TEXCOORD0,
+	in float3 iNormal   	: NORMAL,	
+	// Vertex Outputs
+	out float4 oPosition 	: POSITION,
+	out float2 oUV			: TEXCOORD0,
+	out float  oFogFactor	: TEXCOORD1,
+	out float4 oDiffuse		: COLOR,
+	// User parameter
+	uniform float4x4	worldviewproj_matrix,
+	uniform float4x4	texture_matrix0,
+	uniform float4x4	worldview_matrix,
+	uniform float4 		fog_params,
+	uniform float4x4	inverse_transpose_worldview_matrix,
+	uniform float3		light_direction_view_space0,
+	uniform float3		light_position_view_space_array[MAX_LIGHTS],
+	uniform float4		derived_light_diffuse_colour_array[MAX_LIGHTS],
+	uniform float4		derived_scene_colour,
+	uniform float4		light_attenuation_array[MAX_LIGHTS],
+	uniform float		light_count)
+{
+	oPosition = mul(worldviewproj_matrix, iPosition);	
+	oUV = mul(texture_matrix0, float4(iUV, 0, 1));
+	FFP_VertexFog_Exp2(worldviewproj_matrix, iPosition, fog_params, oFogFactor);
+	
+	oDiffuse = derived_scene_colour;	
+	FFP_Light_Directional_Diffuse(inverse_transpose_worldview_matrix,
+		iNormal,
+		-light_direction_view_space0,
+		derived_light_diffuse_colour_array[0].rgb,		
+		oDiffuse.rgb, oDiffuse.rgb);
+	
+	for(int LightIndex=1;LightIndex<int(light_count);++LightIndex)
+	{
+		FFP_Light_Point_Diffuse(
+			worldview_matrix,
+			iPosition,
+			inverse_transpose_worldview_matrix,
+			iNormal,
+			light_position_view_space_array[LightIndex].xyz,
+			light_attenuation_array[LightIndex],
+			derived_light_diffuse_colour_array[LightIndex].rgb,
+			oDiffuse.rgb,
+			oDiffuse.rgb);
+	}
+}

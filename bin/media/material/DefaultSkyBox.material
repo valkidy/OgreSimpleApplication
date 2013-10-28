@@ -1,0 +1,26 @@
+material DefaultSkyBox
+{
+	technique
+	{
+		pass
+		{
+			vertex_program_ref TextureThrough_VP
+			{
+			}
+			
+			fragment_program_ref TextureThrough_FP
+			{
+			}
+			
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				cubic_texture skybox.png separateUV
+				tex_address_mode clamp
+			}
+		}
+	}
+}
+

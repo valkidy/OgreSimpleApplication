@@ -1,0 +1,33 @@
+//-----------------------------------------------------------------------------
+//                         GLOBAL Defination
+//-----------------------------------------------------------------------------
+#ifdef USE_GL
+	#version 120
+#else
+	#version 100
+	precision mediump int;
+	precision highp float;
+#endif
+
+//-----------------------------------------------------------------------------
+//                         GLOBAL PARAMETERS
+//-----------------------------------------------------------------------------
+uniform sampler2D DiffuseMap;
+uniform vec4 fog_colour;
+//-----------------------------------------------------------------------------
+//                         Pixel Inputs
+//-----------------------------------------------------------------------------
+varying vec2 oUv;
+varying float oFogFactor;
+varying vec4 oDiffuse;
+//-----------------------------------------------------------------------------
+// Function Name: main
+// Function Desc: Pixel Program Entry point
+//-----------------------------------------------------------------------------
+void main()
+{	
+	gl_FragColor = texture2D(DiffuseMap, oUv)*oDiffuse;
+	if(gl_FragColor.a < 0.50196)
+		discard;
+	gl_FragColor.rgb = mix(fog_colour.rgb, gl_FragColor.rgb, oFogFactor);
+}

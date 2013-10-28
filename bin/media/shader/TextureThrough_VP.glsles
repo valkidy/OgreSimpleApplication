@@ -1,0 +1,36 @@
+//-----------------------------------------------------------------------------
+//                         GLOBAL Defination
+//-----------------------------------------------------------------------------
+#ifdef USE_GL
+	#version 120
+#else
+	#version 100
+	precision mediump int;
+	precision highp float;	
+#endif
+//-----------------------------------------------------------------------------
+//                         GLOBAL PARAMETERS
+//-----------------------------------------------------------------------------
+uniform	mat4 worldviewproj_matrix;
+uniform mat4 texture_matrix0;
+//-----------------------------------------------------------------------------
+//                         Vertex Inputs
+//-----------------------------------------------------------------------------
+//Inputs, can't ReName...
+attribute vec4 position;
+attribute vec2 uv0;
+//-----------------------------------------------------------------------------
+//                         Vertex Outputs
+//-----------------------------------------------------------------------------
+//Outputs
+//the name need to be the same pixel input name.
+varying vec2 oUv;
+//-----------------------------------------------------------------------------
+// Function Name: main
+// Function Desc: Vertex Program Entry point
+//-----------------------------------------------------------------------------
+void main()
+{	
+	gl_Position = worldviewproj_matrix*position;
+	oUv = (texture_matrix0 * vec4(uv0, 1.0, 1.0)).xy;
+}

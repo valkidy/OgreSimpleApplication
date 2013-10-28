@@ -1,0 +1,80 @@
+vertex_program PassThrough_VP_HLSL hlsl
+{
+	source shader/PassThrough.cg
+	entry_point main_vp
+	target vs_3_0
+	default_params
+	{	
+		param_named_auto	worldviewproj_matrix				worldviewproj_matrix
+		param_named_auto	texture_matrix0    					texture_matrix 0
+	}
+}
+
+vertex_program PassThrough_VP_GLSL glsl
+{
+	source shader/PassThrough_VP.glsles
+	preprocessor_defines USE_GL=1
+	default_params
+	{
+		param_named_auto	worldviewproj_matrix				worldviewproj_matrix
+		param_named_auto	texture_matrix0    					texture_matrix 0
+	}
+}
+
+vertex_program PassThrough_VP_GLSLES glsles
+{
+	source shader/PassThrough_VP.glsles
+	profiles glsles
+	default_params
+	{
+		param_named_auto	worldviewproj_matrix				worldviewproj_matrix
+		param_named_auto	texture_matrix0    					texture_matrix 0
+	}
+}
+
+vertex_program PassThrough_VP unified
+{
+	delegate PassThrough_VP_GLSLES
+	delegate PassThrough_VP_GLSL
+	delegate PassThrough_VP_HLSL
+}
+
+fragment_program PassThrough_FP_HLSL hlsl
+{
+	source shader/PassThrough.cg
+	entry_point main_fp
+	target ps_3_0
+	default_params
+	{
+		param_named_auto	derived_scene_colour	derived_scene_colour
+	}
+}
+
+fragment_program PassThrough_FP_GLSL glsl
+{
+	source shader/PassThrough_FP.glsles
+	preprocessor_defines USE_GL=1
+	default_params
+	{
+		param_named DiffuseMap int 0
+		param_named_auto	derived_scene_colour	derived_scene_colour
+	}
+}
+
+fragment_program PassThrough_FP_GLSLES glsles
+{
+	source shader/PassThrough_FP.glsles
+	profiles glsles
+	default_params
+	{
+		param_named DiffuseMap int 0
+		param_named_auto	derived_scene_colour	derived_scene_colour
+	}
+}
+
+fragment_program PassThrough_FP unified
+{
+	delegate PassThrough_FP_GLSLES
+	delegate PassThrough_FP_GLSL
+	delegate PassThrough_FP_HLSL
+}

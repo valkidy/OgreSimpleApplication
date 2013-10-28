@@ -1,0 +1,24 @@
+//-----------------------------------------------------------------------------
+//                         PROGRAM DEPENDENCIES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//                         GLOBAL Defination
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Function Name: main_fp
+// Function Desc: Pixel Program Entry point
+//-----------------------------------------------------------------------------
+void main_fp(
+	// Pixel Inputs
+	in float2 iUV			: TEXCOORD0,
+	in float  iFogFactor	: TEXCOORD1,
+	in float4 iDiffuse		: COLOR,
+	// Pixel Outputs
+    out float4 oColor		: COLOR,
+	// User parameter
+	uniform sampler2D DiffuseMap : register(s0),
+	uniform float4 fog_colour)
+{	
+	oColor = tex2D(DiffuseMap, iUV)*iDiffuse;
+	oColor.rgb = lerp(fog_colour.rgb, oColor.rgb, iFogFactor);
+}

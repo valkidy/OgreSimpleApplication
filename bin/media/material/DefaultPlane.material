@@ -1,0 +1,26 @@
+material DefaultPlane
+{
+	technique
+	{
+		pass
+		{
+			vertex_program_ref TextureThrough_VP
+			{
+			}
+			
+			fragment_program_ref TextureThrough_FP
+			{
+			}
+			
+			lighting off
+			
+			texture_unit
+			{
+				texture MRAMOR6X6.jpg
+				scale 0.5 0.5
+				tex_address_mode wrap
+			}
+		}
+	}
+}
+

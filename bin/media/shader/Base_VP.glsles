@@ -1,0 +1,158 @@
+//no support...
+//#include "TemplateMaterial/Programs/CoreLib/FFPLib_Lighting.glsles"
+//-----------------------------------------------------------------------------
+//                         GLOBAL Defination
+//-----------------------------------------------------------------------------
+#ifdef USE_GL
+	#version 120
+#else
+	//lowp [-255, +255]
+	//mediump [-1023, +1023]
+	//highp [-65535, +65535]
+	#version 100
+	precision mediump int;
+	precision highp float;	
+#endif
+#define MAX_LIGHTS 4
+//-----------------------------------------------------------------------------
+//                         GLOBAL PARAMETERS
+//-----------------------------------------------------------------------------
+uniform	mat4 worldviewproj_matrix;
+uniform	mat4 texture_matrix0;
+uniform	mat4 worldview_matrix;
+uniform vec4 fog_params;
+uniform	mat4 inverse_transpose_worldview_matrix;
+uniform	vec3 light_direction_view_space0;
+uniform	vec4 derived_scene_colour;
+uniform	vec3 light_position_view_space_array[MAX_LIGHTS];
+uniform	vec4 derived_light_diffuse_colour_array[MAX_LIGHTS];
+uniform	vec4 light_attenuation_array[MAX_LIGHTS];
+uniform float light_count;
+//-----------------------------------------------------------------------------
+//                         Vertex Inputs
+//-----------------------------------------------------------------------------
+//Inputs, can't ReName...
+attribute vec4 position;
+attribute vec2 uv0;
+attribute vec3 normal;
+//-----------------------------------------------------------------------------
+//                         Vertex Outputs
+//-----------------------------------------------------------------------------
+//Outputs
+varying vec2 oUv;
+varying float oFogFactor;
+varying vec4 oDiffuse;
+//-----------------------------------------------------------------------------
+//                         Utility Function
+//-----------------------------------------------------------------------------
+/*vec4 lit(float NdotL, float NdotH, float m)
+{
+
+  float ambient = 1.0;
+  float diffuse = max(NdotL, 0.0);
+  float specular = step(0.0, NdotL) * max(NdotH * m, 0.0);
+
+  return vec4(ambient, diffuse, specular, 1.0);
+}*/
+//-----------------------------------------------------------------------------
+void FFP_Light_Directional_Diffuse(in mat4 mWorldViewIT, 
+				   in vec3 vNormal,
+				   in vec3 vNegLightDirView,
+				   in vec3 vDiffuseColour, 
+				   in vec3 vBaseColour, 
+				   out vec3 vOut)
+{
+	vec3 vNormalView = normalize((mWorldViewIT * vec4(vNormal.xyz, 1.0)).xyz); 
+	float nDotL      = dot(vNormalView, vNegLightDirView);
+	
+	vOut = vBaseColour + vDiffuseColour * clamp(nDotL, 0.0, 1.0);
+}
+//-----------------------------------------------------------------------------
+void FFP_Light_Point_Diffuse(in mat4 mWorldView, 
+					in vec4 vPos,
+					in mat4 mWorldViewIT, 
+				    in vec3 vNormal,
+				    in vec3 vLightPosView,
+				    in vec4 vAttParams,
+				    in vec3 vDiffuseColour, 
+				    in vec3 vBaseColour, 
+				    out vec3 vOut)
+{
+	vOut = vBaseColour;		
+
+	vec3 vViewPos    = (mWorldView * vPos).xyz;
+	vec3 vLightView  = vLightPosView - vViewPos;
+	float fLightD    = length(vLightView);
+	vec3 vNormalView = normalize((mWorldViewIT * vec4(vNormal.xyz, 1.0)).xyz);
+	float nDotL      = dot(vNormalView, normalize(vLightView));
+	
+	if (nDotL > 0.0 && fLightD <= vAttParams.x)
+	{
+		float fAtten = 1.0 / (vAttParams.y + vAttParams.z * fLightD + vAttParams.w * fLightD * fLightD);
+			
+		vOut += vDiffuseColour * nDotL * fAtten;
+	}		
+}
+//-----------------------------------------------------------------------------
+void FFP_VertexFog_Exp2(in mat4 mWorldViewProj, 
+				   in vec4 pos, 				   
+				   in vec4 fogParams,				   
+				   out float oFogFactor)
+{
+	vec4 vOutPos    = mWorldViewProj * pos;
+	float distance  = abs(vOutPos.w);	
+	float exp       = (distance * fogParams.x * distance * fogParams.x);
+	float fogFactor = 1.0 / pow(2.71828, exp);
+	
+	oFogFactor      = clamp(fogFactor, 0.0, 1.0);	
+}
+//-----------------------------------------------------------------------------
+// Function Name: main
+// Function Desc: Vertex Program Entry point
+//-----------------------------------------------------------------------------
+void main()
+{	
+	gl_Position = worldviewproj_matrix*position;
+	oUv = (texture_matrix0 * vec4(uv0, 1.0, 1.0)).xy;
+	FFP_VertexFog_Exp2(worldviewproj_matrix, position, fog_params, oFogFactor);
+	
+	oDiffuse = derived_scene_colour;
+	FFP_Light_Directional_Diffuse(inverse_transpose_worldview_matrix,
+		normal,		
+		-light_direction_view_space0,
+		derived_light_diffuse_colour_array[0].rgb,
+		oDiffuse.rgb, oDiffuse.rgb);
+		
+	FFP_Light_Point_Diffuse(
+			worldview_matrix,
+			position,
+			inverse_transpose_worldview_matrix,
+			normal,
+			light_position_view_space_array[1].xyz,
+			light_attenuation_array[1],
+			derived_light_diffuse_colour_array[1].rgb,
+			oDiffuse.rgb,
+			oDiffuse.rgb);
+			
+	FFP_Light_Point_Diffuse(
+			worldview_matrix,
+			position,
+			inverse_transpose_worldview_matrix,
+			normal,
+			light_position_view_space_array[2].xyz,
+			light_attenuation_array[2],
+			derived_light_diffuse_colour_array[2].rgb,
+			oDiffuse.rgb,
+			oDiffuse.rgb);
+			
+	FFP_Light_Point_Diffuse(
+			worldview_matrix,
+			position,
+			inverse_transpose_worldview_matrix,
+			normal,
+			light_position_view_space_array[3].xyz,
+			light_attenuation_array[3],
+			derived_light_diffuse_colour_array[3].rgb,
+			oDiffuse.rgb,
+			oDiffuse.rgb);
+}

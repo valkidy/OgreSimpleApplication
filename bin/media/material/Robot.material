@@ -1,0 +1,23 @@
+material Examples/Robot
+{	
+	// Software blending technique
+	technique
+	{
+		pass
+		{
+			vertex_program_ref TextureThrough_VP
+			{
+			}
+			
+			fragment_program_ref TextureThrough_FP
+			{
+			}
+			
+			texture_unit
+			{
+				texture r2skin.jpg
+			}
+		}
+	}
+}
+

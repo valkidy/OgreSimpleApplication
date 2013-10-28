@@ -1,0 +1,157 @@
+set $MaxLights 4
+
+vertex_program Base_VP_HLSL hlsl
+{
+	source shader/Base_VP.cg
+	entry_point main_vp
+	target vs_3_0
+}
+
+vertex_program Base_VP_GLSL glsl
+{
+	source shader/Base_VP.glsles
+	preprocessor_defines USE_GL=1
+}
+
+vertex_program Base_VP_GLSLES glsles
+{
+	source shader/Base_VP.glsles
+	profiles glsles
+}
+
+vertex_program Base_VP unified
+{
+	delegate Base_VP_GLSLES
+	delegate Base_VP_GLSL
+	delegate Base_VP_HLSL
+	default_params
+	{	
+		param_named_auto	worldviewproj_matrix				worldviewproj_matrix
+		param_named_auto	texture_matrix0						texture_matrix 0
+		param_named_auto	worldview_matrix					worldview_matrix
+		param_named_auto	fog_params							fog_params
+		param_named_auto	inverse_transpose_worldview_matrix	inverse_transpose_worldview_matrix
+		param_named_auto	light_direction_view_space0			light_direction_view_space 0
+		param_named_auto	light_position_view_space_array		light_position_view_space_array $MaxLights		
+		param_named_auto	derived_light_diffuse_colour_array	derived_light_diffuse_colour_array $MaxLights
+		param_named_auto	derived_scene_colour				derived_scene_colour
+		param_named_auto	light_attenuation_array				light_attenuation_array $MaxLights
+		param_named_auto	light_count							light_count
+	}
+}
+//Base Program
+fragment_program Base_FP_HLSL hlsl
+{
+	source shader/Base_FP.cg
+	entry_point main_fp
+	target ps_3_0	
+}
+
+fragment_program Base_FP_GLSL glsl
+{
+	source shader/Base_FP.glsles
+	preprocessor_defines USE_GL=1
+	default_params
+	{
+		param_named DiffuseMap int 0
+	}
+}
+
+fragment_program Base_FP_GLSLES glsles
+{
+	source shader/Base_FP.glsles
+	profiles glsles
+	default_params
+	{
+		param_named DiffuseMap int 0
+	}
+}
+
+fragment_program Base_FP unified
+{
+	delegate Base_FP_GLSLES
+	delegate Base_FP_GLSL
+	delegate Base_FP_HLSL
+	default_params
+	{
+		param_named_auto		fog_colour		fog_colour
+	}
+}
+//Base AlphaReject Program
+fragment_program BaseAlphaReject_FP_HLSL hlsl
+{
+	source shader/BaseAlphaReject_FP.cg
+	entry_point main_fp
+	target ps_3_0	
+}
+
+fragment_program BaseAlphaReject_FP_GLSL glsl
+{
+	source shader/BaseAlphaReject_FP.glsles
+	preprocessor_defines USE_GL=1
+	default_params
+	{
+		param_named DiffuseMap int 0
+	}
+}
+
+fragment_program BaseAlphaReject_FP_GLSLES glsles
+{
+	source shader/BaseAlphaReject_FP.glsles
+	profiles glsles
+	default_params
+	{
+		param_named DiffuseMap int 0
+	}
+}
+
+fragment_program BaseAlphaReject_FP unified
+{
+	delegate BaseAlphaReject_FP_GLSLES
+	delegate BaseAlphaReject_FP_GLSL
+	delegate BaseAlphaReject_FP_HLSL
+	default_params
+	{
+		param_named_auto		fog_colour		fog_colour
+	}
+}
+
+material Template_Basic
+{
+	technique
+	{
+		pass Base
+		{
+			scene_blend alpha_blend
+            transparent_sorting force
+			vertex_program_ref Base_VP
+			{
+			}
+			fragment_program_ref Base_FP
+			{
+			}			
+			texture_unit BaseMap
+			{
+			}
+		}
+	}
+}
+
+material Template_BasicAlphaReject
+{
+	technique
+	{
+		pass Base
+		{
+			vertex_program_ref Base_VP
+			{
+			}
+			fragment_program_ref BaseAlphaReject_FP
+			{
+			}			
+			texture_unit BaseMap
+			{
+			}
+		}
+	}
+}
