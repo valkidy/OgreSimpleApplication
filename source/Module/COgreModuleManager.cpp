@@ -1,5 +1,4 @@
-#include "COgreModuleHeader.h"
-#include "CSampleModule.h"
+#include "COgreHeader.h"
 
 SINGLETON_IMPLEMENT(COgreModuleManager)
 

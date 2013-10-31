@@ -1,18 +1,6 @@
 #pragma once
-
-#pragma warning(disable: 4010)
-#pragma warning(disable: 4251)
-#pragma warning(disable: 4996)
-#pragma warning(disable: 4193)
-#pragma warning(disable: 4275)
-
-#include <Ogre.h>
-#include <OIS/OIS.h>
-
-#pragma comment(lib , "OgreMain_d.lib")
-#pragma comment(lib , "OIS_d.lib")
           
-#include "COgreModuleHeader.h"
+#include "COgreHeader.h"
 
 class COgreApplication : 
     public OIS::KeyListener,
@@ -54,5 +42,12 @@ protected:
 
     static COgreApplication* sm_pSharedApplication;
 
+    CPanelManager m_PanelManager;
     COgreModuleManager m_ModuleManager;
 };
+
+/* =====================================================================================
+ | win32 function
+ ===================================================================================== */
+HWND CreateWin32Window(int _width, int _height, HINSTANCE hInstance);
+static LRESULT CALLBACK WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );

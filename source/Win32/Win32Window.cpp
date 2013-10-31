@@ -1,4 +1,4 @@
-#include "Win32Platform.h"
+#include "Win32Application.h"
 
 #define IDI_MAIN_ICON ""
 #define ID_APP_MAIN   L"Win32Application"

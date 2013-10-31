@@ -2,15 +2,15 @@
 
 #include <assert.h>
 
-#define CheckMemory() {                                  \
-        int flag=  _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);  \
-        flag |= _CRTDBG_LEAK_CHECK_DF;                   \
-        flag &= ~_CRTDBG_CHECK_CRT_DF;                   \
-        _CrtSetDbgFlag(flag);                            \
-    }    
-
+/*=============================================================================
+| global utility function.
+=============================================================================*/
 void LOG(const char* format, ...);
+size_t CalculateProcessMemory();
 
+/*=============================================================================
+| tamplate class for singleton.
+=============================================================================*/
 template <typename T>
 class TSingleton
 {
@@ -20,11 +20,21 @@ protected:
 public:
 	TSingleton() {ms_singleton = ((T *)this);}
 	virtual ~TSingleton() {assert(ms_singleton); ms_singleton = 0;}
-
+    
 private:
-	TSingleton(const TSingleton& cpy) {}
+	TSingleton(const TSingleton& copy) {}
 	TSingleton &operator = (const TSingleton& rhs) {return *this;}
 };
+
+/*=============================================================================
+| Marco usage.
+=============================================================================*/
+#define CHECK_MEMORY() {                                  \
+        int flag=  _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);  \
+        flag |= _CRTDBG_LEAK_CHECK_DF;                   \
+        flag &= ~_CRTDBG_CHECK_CRT_DF;                   \
+        _CrtSetDbgFlag(flag);                            \
+    }  
 
 #define SINGLETON_DECLARE(name)                       \
     public:                                           \
@@ -40,3 +50,4 @@ private:
     name* name::getSingletonPtr(void){                  \
         return ms_singleton;                            \
     }
+

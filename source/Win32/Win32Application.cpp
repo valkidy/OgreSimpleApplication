@@ -1,7 +1,7 @@
-#include "Win32Platform.h"
+#include "Win32Application.h"
 
 #include <windows.h>
-#define FRAMERATE (1.0f/30.0f)
+#define FRAMERATE (1.0f/60.0f)
 
 COgreApplication * COgreApplication::sm_pSharedApplication = 0;
 
@@ -128,6 +128,8 @@ COgreApplication::ApplicationInit()
 void
 COgreApplication::ApplicationTerminate()
 {
+    m_PanelManager.Finalize();
+
     if(m_pInputMgr)	
         OIS::InputManager::destroyInputSystem(m_pInputMgr);
 

@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)bin\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)bin\"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\..\ogre_svn\OgreMain\include&quot;;&quot;$(SolutionDir)..\..\ogre_svn\Dependencies\include&quot;;&quot;$(SolutionDir)\source\Win32&quot;;&quot;$(SolutionDir)\source\Sample&quot;;&quot;$(SolutionDir)\source\Module&quot;;&quot;$(SolutionDir)\source&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\OgreMain\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\include&quot;;&quot;$(SolutionDir)\source\Win32&quot;;&quot;$(SolutionDir)\source\Sample&quot;;&quot;$(SolutionDir)\source\Widget&quot;;&quot;$(SolutionDir)\source\Module&quot;;&quot;$(SolutionDir)\source&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\..\ogre_svn\Dependencies\lib\Debug&quot;;&quot;$(SolutionDir)..\..\ogre_svn\Build\lib\Debug&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\lib\Debug&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\lib\Debug&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -179,10 +179,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\source\Module\COgreModuleHeader.h"
-				>
-			</File>
-			<File
 				RelativePath="..\source\Module\COgreModuleManager.cpp"
 				>
 			</File>
@@ -203,10 +199,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\source\Win32\Win32Platform.h"
-				>
-			</File>
-			<File
 				RelativePath="..\source\Win32\Win32Utility.cpp"
 				>
 			</File>
@@ -216,10 +208,6 @@
 			</File>
 			<File
 				RelativePath="..\source\Win32\Win32Window.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\source\Win32\Win32Window.h"
 				>
 			</File>
 		</Filter>
@@ -235,6 +223,46 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Widget"
+			>
+			<File
+				RelativePath="..\source\Module\COgreModuleTemplate.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Module\COgreModuleTemplate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Widget\CParamPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Widget\CParamPanel.h"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Widget\CParamPanelManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Widget\CParamPanelManager.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Snippets"
+			>
+			<File
+				RelativePath="..\source\Snippets\MemoryLeak.cpp"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath="..\source\Module\COgreHeader.h"
+			>
+		</File>
 		<File
 			RelativePath="..\source\main.cpp"
 			>
