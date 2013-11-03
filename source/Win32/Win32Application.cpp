@@ -80,7 +80,7 @@ COgreApplication::init()
     m_pMouse->getMouseState().width = m_pRenderWindow->getWidth();
     m_pMouse->getMouseState().height = m_pRenderWindow->getHeight();
     m_pMouse->setEventCallback(this);
-
+        
     //prepare resource
     Ogre::String secName, typeName, archiveName;
     Ogre::ConfigFile cf;
@@ -129,6 +129,7 @@ void
 COgreApplication::ApplicationTerminate()
 {
     m_PanelManager.Finalize();
+    m_ModuleManager.Finalize();
 
     if(m_pInputMgr)	
         OIS::InputManager::destroyInputSystem(m_pInputMgr);

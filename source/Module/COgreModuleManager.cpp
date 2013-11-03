@@ -8,6 +8,17 @@ COgreModuleManager::Initialise()
     ChangeModule<CSampleModule>();
 }
 
+void 
+COgreModuleManager::Finalize()
+{
+    if (m_pCurrentModule)
+    {
+        m_pCurrentModule->destroyScene();
+        delete m_pCurrentModule;
+        m_pCurrentModule = NULL;
+    } // End if
+}
+
 template<typename T> T* 
 COgreModuleManager::ChangeModule()
 {    

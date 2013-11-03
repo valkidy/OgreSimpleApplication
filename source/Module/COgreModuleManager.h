@@ -11,9 +11,10 @@ class COgreModuleManager :
 public:
     COgreModuleManager() : 
         m_pCurrentModule(NULL) {}
-    virtual ~COgreModuleManager() { if (m_pCurrentModule) delete m_pCurrentModule;}
+        virtual ~COgreModuleManager() {}
 
     void Initialise();
+    void Finalize();
 
     template<typename T>
     T* ChangeModule();
