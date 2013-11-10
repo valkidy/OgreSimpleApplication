@@ -29,5 +29,6 @@
 
 // module instance
 #include "CSampleModule.h"
+#include "CSampleModuleRayCasting.h"
 
 #endif

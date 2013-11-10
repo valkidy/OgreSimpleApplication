@@ -9,7 +9,9 @@ class CSimpleModuleTemplate :
     public COgreModule
 {
 public:
-    CSimpleModuleTemplate() {}
+    CSimpleModuleTemplate() : 
+        m_pSceneMgr(NULL),
+        m_pCamera(NULL) {}
     virtual ~CSimpleModuleTemplate() {}
 
 public:

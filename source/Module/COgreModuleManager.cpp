@@ -5,7 +5,7 @@ SINGLETON_IMPLEMENT(COgreModuleManager)
 void 
 COgreModuleManager::Initialise()
 {
-    ChangeModule<CSampleModule>();
+    ChangeModule<CSampleModuleRayCasting>();
 }
 
 void 

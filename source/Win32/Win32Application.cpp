@@ -40,8 +40,15 @@ COgreApplication::init()
     //root
     m_pRoot = new Ogre::Root("plugins_d.cfg");
 
-    //render window
-    m_pRoot->setRenderSystem( m_pRoot->getRenderSystemByName("Direct3D9 Rendering Subsystem") );    
+    const Ogre::RenderSystemList& RenderSysList = m_pRoot->getAvailableRenderers();
+    for (Ogre::RenderSystemList::const_iterator it=RenderSysList.begin() ; it!=RenderSysList.end() ; ++it)
+    {
+        LOG("Avaiable render system = %s", (*it)->getName().c_str());
+    } // End for
+
+    //render window    
+    m_pRoot->setRenderSystem( m_pRoot->getRenderSystemByName("OpenGL Rendering Subsystem") );
+    //m_pRoot->setRenderSystem( m_pRoot->getRenderSystemByName("Direct3D9 Rendering Subsystem") );    
     m_pRoot->initialise(false);
 
     HWND hWnd = CreateWin32Window(1024, 768, GetModuleHandle( NULL ));

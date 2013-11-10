@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\ogre_svn\Components\Overlay\include&quot;;&quot;$(SolutionDir)..\ogre_svn\OgreMain\include&quot;;&quot;$(SolutionDir)..\ogre_svn\Dependencies\include&quot;;&quot;$(SolutionDir)..\ogre_svn\Build\include&quot;;&quot;$(SolutionDir)\source\Win32&quot;;&quot;$(SolutionDir)\source\Sample&quot;;&quot;$(SolutionDir)\source\Widget&quot;;&quot;$(SolutionDir)\source\Module&quot;;&quot;$(SolutionDir)\source&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\Components\Overlay\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\OgreMain\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\include&quot;;&quot;$(SolutionDir)..\bullet-2.81-rev2613\src&quot;;&quot;$(SolutionDir)\source\Win32&quot;;&quot;$(SolutionDir)\source\Sample&quot;;&quot;$(SolutionDir)\source\Widget&quot;;&quot;$(SolutionDir)\source\Module&quot;;&quot;$(SolutionDir)\source&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\ogre_svn\Dependencies\lib\Debug&quot;;&quot;$(SolutionDir)..\ogre_svn\Build\lib\Debug&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\lib\Debug&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\lib\Debug&quot;;&quot;D:\bullet-2.81-rev2613\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -228,6 +228,14 @@
 			</File>
 			<File
 				RelativePath="..\source\Sample\CSampleModule.h"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CSampleModuleRayCasting.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CSampleModuleRayCasting.h"
 				>
 			</File>
 		</Filter>

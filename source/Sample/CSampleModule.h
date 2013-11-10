@@ -1,6 +1,6 @@
 #pragma once
 
-#include "COgreModuleTemplate.h"
+#include "COgreHeader.h"
 
 /*=============================================================================
 | Basic parameters panel widget.
