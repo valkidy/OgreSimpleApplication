@@ -130,8 +130,8 @@ CSimpleModuleTemplate::keyReleased(const OIS::KeyCode& iKeyCode)
     case OIS::KC_C:
         {
             Widget* _panel = CPanelManager::getSingleton().FindWidget("StatPanel");
-            assert(_panel);
-            _panel->setVisible( !_panel->isVisible() );
+            if (_panel)
+                _panel->setVisible( !_panel->isVisible() );
         }
         break;
     }

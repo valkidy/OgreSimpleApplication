@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\Components\Overlay\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\OgreMain\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\include&quot;;&quot;$(SolutionDir)..\bullet-2.81-rev2613\src&quot;;&quot;$(SolutionDir)\source\Win32&quot;;&quot;$(SolutionDir)\source\Sample&quot;;&quot;$(SolutionDir)\source\Widget&quot;;&quot;$(SolutionDir)\source\Module&quot;;&quot;$(SolutionDir)\source&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\OgreMain\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Components\Overlay\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\include&quot;;&quot;$(SolutionDir)..\bullet-2.81-rev2613\src&quot;;&quot;$(SolutionDir)\source\Win32&quot;;&quot;$(SolutionDir)\source\Sample&quot;;&quot;$(SolutionDir)\source\Widget&quot;;&quot;$(SolutionDir)\source\Module&quot;;&quot;$(SolutionDir)\source&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\lib\Debug&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\lib\Debug&quot;;&quot;D:\bullet-2.81-rev2613\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\lib\Debug&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\lib\Debug&quot;;&quot;$(SolutionDir)..\bullet-2.81-rev2613\lib&quot;;&quot;$(SolutionDir)..\bullet-2.81-rev2613\Glut&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -223,10 +223,6 @@
 			Name="Sample"
 			>
 			<File
-				RelativePath="..\source\Sample\CSampleModule.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\source\Sample\CSampleModule.h"
 				>
 			</File>
@@ -238,6 +234,46 @@
 				RelativePath="..\source\Sample\CSampleModuleRayCasting.h"
 				>
 			</File>
+			<File
+				RelativePath="..\source\Sample\CSamplePhysicModule.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CSamplePhysicModule.h"
+				>
+			</File>
+			<Filter
+				Name="OpenGLSupport"
+				>
+				<File
+					RelativePath="..\source\Sample\CGLNativeRenderQueueListener.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\CGLNativeRenderQueueListener.h"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\GLDebugDrawer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\GLDebugDrawer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\GLDebugFont.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\GLDebugFont.h"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\GlutStuff.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Widget"
