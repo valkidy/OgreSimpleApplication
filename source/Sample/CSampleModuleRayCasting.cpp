@@ -52,6 +52,17 @@ CSampleModuleRayCasting::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButt
     return true;
 }
 
+bool 
+CSampleModuleRayCasting::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
+{
+    CSimpleModuleTemplate::mouseReleased(evt, id);
+
+    if (m_pBulletPhysicManager)
+        m_pBulletPhysicManager->removePickingConstraint();
+
+    return true;
+}
+
 bool
 CSampleModuleRayCasting::mouseMoved(const OIS::MouseEvent &evt)
 {
@@ -59,8 +70,8 @@ CSampleModuleRayCasting::mouseMoved(const OIS::MouseEvent &evt)
 
     const OIS::MouseState& ms = evt.state;
 
-    //if (m_pBulletPhysicManager)
-    //    m_pBulletPhysicManager->dragObject(ms.X.abs, ms.Y.abs);
+    if (m_pBulletPhysicManager)
+        m_pBulletPhysicManager->dragPickingConstraint(ms.X.abs, ms.Y.abs);
 
     return true;
 }

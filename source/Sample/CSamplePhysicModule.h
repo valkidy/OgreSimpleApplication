@@ -42,15 +42,14 @@ public:
     ~CBulletPhysicManager()  {release();}
 
     void simulate(double dt);
-    void rayCasting(float mouse_x, float mouse_y);
-    void dragObject(float mouse_x, float mouse_y);
+    void rayCasting(float x, float y);
+    void addPickingConstraint(btRigidBody* body, const btVector3& localPivot);
+    void removePickingConstraint();
+    void dragPickingConstraint(float x, float y);
 
 protected:
     void init();
     void release();
-    
-    void addPickingConstraint(btRigidBody* body, const btVector3& localPivot);
-    void removePickingConstraint();
 
 private:
     // bullet shape manage container

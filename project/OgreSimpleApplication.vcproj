@@ -282,6 +282,22 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="D3d9Support"
+				>
+				<File
+					RelativePath="..\source\Sample\D3d9DebugDrawer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\D3d9DebugDrawer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\D3d9Stuff.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Widget"
