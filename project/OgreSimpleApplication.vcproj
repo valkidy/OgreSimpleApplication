@@ -242,6 +242,14 @@
 				RelativePath="..\source\Sample\CSamplePhysicModule.h"
 				>
 			</File>
+			<File
+				RelativePath="..\source\Sample\CSamplePhysicUtility.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CSamplePhysicUtility.h"
+				>
+			</File>
 			<Filter
 				Name="OpenGLSupport"
 				>

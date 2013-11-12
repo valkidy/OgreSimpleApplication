@@ -13,9 +13,13 @@ void doNativeRenderQuads()
     glDisable(GL_LIGHTING);
 
 	glScalef(10.0f, 10.0f, 10.0f);
+	
+    // rotation
+    static float deg = 0.0f;
+    glRotatef(deg += 2.0f, 0.0f, 1.0f, 0.0f);
+    glRotatef(deg += 1.0f, 0.0f, 0.0f, 1.0f);
 
-	// sample code from here: http://www.oreillynet.com/network/2000/06/23/magazine/cube.c
-			
+    // sample code from here: http://www.oreillynet.com/network/2000/06/23/magazine/cube.c
 	// quads.
 	glBegin(GL_QUADS); 
 
@@ -23,62 +27,62 @@ void doNativeRenderQuads()
 	glNormal3f( 0.0f, -1.0f, 0.0f); // Needed for lighting
 	glColor4f(0.9f, 0.2f, 0.2f, 0.75f); // Basic polygon color
 
-	glTexCoord2f(0.800f, 0.800f); glVertex3f(-1.0f, -1.0f, -1.0f); 
-	glTexCoord2f(0.200f, 0.800f); glVertex3f( 1.0f, -1.0f, -1.0f);
-	glTexCoord2f(0.200f, 0.200f); glVertex3f( 1.0f, -1.0f,  1.0f);
-	glTexCoord2f(0.800f, 0.200f); glVertex3f(-1.0f, -1.0f,  1.0f);
+	glTexCoord2f(0.800f, 0.800f); glVertex3f(-1.0f, 0.5f, -1.0f); 
+	glTexCoord2f(0.200f, 0.800f); glVertex3f( 1.0f, 0.5f, -1.0f);
+	glTexCoord2f(0.200f, 0.200f); glVertex3f( 1.0f, 0.5f,  1.0f);
+	glTexCoord2f(0.800f, 0.200f); glVertex3f(-1.0f, 0.5f,  1.0f);
 
 
     // top face
 	glNormal3f( 0.0f, 1.0f, 0.0f);  glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
 
-	glTexCoord2f(0.005f, 1.995f); glVertex3f(-1.0f,  1.3f, -1.0f);
-	glTexCoord2f(0.005f, 0.005f); glVertex3f(-1.0f,  1.3f,  1.0f);
-	glTexCoord2f(1.995f, 0.005f); glVertex3f( 1.0f,  1.3f,  1.0f);
-	glTexCoord2f(1.995f, 1.995f); glVertex3f( 1.0f,  1.3f, -1.0f);
+	glTexCoord2f(0.005f, 1.995f); glVertex3f(-1.0f,  2.5f, -1.0f);
+	glTexCoord2f(0.005f, 0.005f); glVertex3f(-1.0f,  2.5f,  1.0f);
+	glTexCoord2f(1.995f, 0.005f); glVertex3f( 1.0f,  2.5f,  1.0f);
+	glTexCoord2f(1.995f, 1.995f); glVertex3f( 1.0f,  2.5f, -1.0f);
 
 
 	// back face
 	glNormal3f( 0.0f, 0.0f,-1.0f);  glColor4f(0.2f, 0.9f, 0.2f, 0.5f); 
 
-	glTexCoord2f(0.995f, 0.005f); glVertex3f(-1.0f, -1.0f, -1.3f);
-	glTexCoord2f(2.995f, 2.995f); glVertex3f(-1.0f,  1.0f, -1.3f);
-	glTexCoord2f(0.005f, 0.995f); glVertex3f( 1.0f,  1.0f, -1.3f);
-	glTexCoord2f(0.005f, 0.005f); glVertex3f( 1.0f, -1.0f, -1.3f);
+	glTexCoord2f(0.995f, 0.005f); glVertex3f(-1.0f,  0.5f, -1.0f);
+	glTexCoord2f(2.995f, 2.995f); glVertex3f(-1.0f,  2.5f, -1.0f);
+	glTexCoord2f(0.005f, 0.995f); glVertex3f( 1.0f,  2.5f, -1.0f);
+	glTexCoord2f(0.005f, 0.005f); glVertex3f( 1.0f,  0.5f, -1.0f);
 
 
     // right face
 	glNormal3f( 1.0f, 0.0f, 0.0f);  glColor4f(0.2f, 0.2f, 0.9f, 0.25f);
 
-	glTexCoord2f(0.995f, 0.005f); glVertex3f( 1.0f, -1.0f, -1.0f); 
-	glTexCoord2f(0.995f, 0.995f); glVertex3f( 1.0f,  1.0f, -1.0f);
-	glTexCoord2f(0.005f, 0.995f); glVertex3f( 1.0f,  1.0f,  1.0f);
-	glTexCoord2f(0.005f, 0.005f); glVertex3f( 1.0f, -1.0f,  1.0f);
+	glTexCoord2f(0.995f, 0.005f); glVertex3f( 1.0f,  0.5f, -1.0f); 
+	glTexCoord2f(0.995f, 0.995f); glVertex3f( 1.0f,  2.5f, -1.0f);
+	glTexCoord2f(0.005f, 0.995f); glVertex3f( 1.0f,  2.5f,  1.0f);
+	glTexCoord2f(0.005f, 0.005f); glVertex3f( 1.0f,  0.5f,  1.0f);
 
 
 	// front face
 	glNormal3f( 0.0f, 0.0f, 1.0f); 
 
 	glColor4f( 0.9f, 0.2f, 0.2f, 0.5f);
-	glTexCoord2f( 0.005f, 0.005f); glVertex3f(-1.0f, -1.0f,  1.3f);
+	glTexCoord2f( 0.005f, 0.005f); glVertex3f(-1.0f,  0.5f,  1.0f);
 	glColor4f( 0.2f, 0.9f, 0.2f, 0.5f);
-	glTexCoord2f( 0.995f, 0.005f); glVertex3f( 1.0f, -1.0f,  1.3f);
+	glTexCoord2f( 0.995f, 0.005f); glVertex3f( 1.0f,  0.5f,  1.0f);
 	glColor4f( 0.2f, 0.2f, 0.9f, 0.5f);
-	glTexCoord2f( 0.995f, 0.995f); glVertex3f( 1.0f,  1.0f,  1.3f); 
+	glTexCoord2f( 0.995f, 0.995f); glVertex3f( 1.0f,  2.5f,  1.0f); 
 	glColor4f( 0.1f, 0.1f, 0.1f, 0.5f);
-	glTexCoord2f( 0.005f, 0.995f); glVertex3f(-1.0f,  1.0f,  1.3f);
+	glTexCoord2f( 0.005f, 0.995f); glVertex3f(-1.0f,  2.5f,  1.0f);
 
 	// left face
 	glNormal3f(-1.0f, 0.0f, 0.0f);  
 
 	glColor4f(0.9f, 0.9f, 0.2f, 0.0f);
-	glTexCoord2f(0.005f, 0.005f); glVertex3f(-1.3f, -1.0f, -1.0f); 
+	glTexCoord2f(0.005f, 0.005f); glVertex3f(-1.0f,  0.5f, -1.0f); 
 	glColor4f(0.9f, 0.9f, 0.2f, 0.66f);
-	glTexCoord2f(0.995f, 0.005f); glVertex3f(-1.3f, -1.0f,  1.0f);
+	glTexCoord2f(0.995f, 0.005f); glVertex3f(-1.0f,  0.5f,  1.0f);
 	glColor4f(0.9f, 0.9f, 0.2f, 1.0f);
-	glTexCoord2f(0.995f, 0.995f); glVertex3f(-1.3f,  1.0f,  1.0f);
+	glTexCoord2f(0.995f, 0.995f); glVertex3f(-1.0f,  2.5f,  1.0f);
 	glColor4f(0.9f, 0.9f, 0.2f, 0.33f);
-	glTexCoord2f(0.005f, 0.995f); glVertex3f(-1.3f,  1.0f, -1.0f);
+	glTexCoord2f(0.005f, 0.995f); glVertex3f(-1.0f,  2.5f, -1.0f);
 
 	// All polygons have been drawn.
 	glEnd();	

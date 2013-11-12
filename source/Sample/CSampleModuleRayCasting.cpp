@@ -38,3 +38,31 @@ CSampleModuleRayCasting::updateScene(float fDeltaTime)
 
     CSimpleModuleTemplate::updateScene(fDeltaTime);        
 }
+
+bool 
+CSampleModuleRayCasting::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
+{
+    CSimpleModuleTemplate::mousePressed(evt, id);
+
+    const OIS::MouseState& ms = evt.state;
+
+    if (m_pBulletPhysicManager)
+        m_pBulletPhysicManager->rayCasting(ms.X.abs, ms.Y.abs);
+
+    return true;
+}
+
+bool
+CSampleModuleRayCasting::mouseMoved(const OIS::MouseEvent &evt)
+{
+    CSimpleModuleTemplate::mouseMoved(evt);
+
+    const OIS::MouseState& ms = evt.state;
+
+    //if (m_pBulletPhysicManager)
+    //    m_pBulletPhysicManager->dragObject(ms.X.abs, ms.Y.abs);
+
+    return true;
+}
+
+    
