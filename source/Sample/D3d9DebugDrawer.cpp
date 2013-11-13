@@ -7,7 +7,8 @@
 // A structure for our custom vertex type
 struct D3D9VERTEX
 {
-	btVector3 position; // The untransformed, 3D position for the vertex			
+    Ogre::Vector3 position;
+	//btVector3 position; // The untransformed, 3D position for the vertex			
 	DWORD color;        // The vertex color
 } mVertexBufferForLine[2];
 
@@ -55,18 +56,20 @@ void	D3d9DebugDrawer::drawLine(const btVector3& from,const btVector3& to,const b
 	mWindow->getCustomAttribute( "D3DDEVICE", &pd3dDevice );
 
     pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
-    pd3dDevice->SetRenderState(D3DRS_DIFFUSEMATERIALSOURCE, Ogre::TVC_DIFFUSE);
-	
+    pd3dDevice->SetRenderState(D3DRS_DIFFUSEMATERIALSOURCE, D3DMCS_COLOR1);
+    pd3dDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+
 	// custom FVF, which describes our custom vertex structure
 	#define D3DFVF_VERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE)
 
-    mVertexBufferForLine[0].position = from;
+    mVertexBufferForLine[0].position = Ogre::Vector3(from.getX(), from.getY(), from.getZ());    
     mVertexBufferForLine[0].color = D3DCOLOR_RGBA(
         static_cast<WORD>(fromColor.getX() * 255.0f),
         static_cast<WORD>(fromColor.getY() * 255.0f),
         static_cast<WORD>(fromColor.getZ() * 255.0f),
         255);
-    mVertexBufferForLine[1].position = to;
+    
+    mVertexBufferForLine[1].position = Ogre::Vector3(to.getX(), to.getY(), to.getZ());        
     mVertexBufferForLine[1].color = D3DCOLOR_RGBA(
         static_cast<WORD>(toColor.getX() * 255.0f),
         static_cast<WORD>(toColor.getY() * 255.0f),
