@@ -7,10 +7,10 @@
 #pragma warning(disable: 4275)
 
 #include <Ogre.h>
-#include <gl\gl.h>
 
 #include "GlutStuff.h"
 #include "GLDebugDrawer.h"
+#include "D3d9DebugDrawer.h"
 #include "BulletDynamics/Dynamics/btDynamicsWorld.h"
 
 #pragma comment(lib , "opengl32.lib")
@@ -73,5 +73,6 @@ protected:
     Ogre::SceneManager* mSceneMgr;
     btDynamicsWorld* mDynamicsWorld;
     
-    GLDebugDrawer mDebugDraw;    
+    D3d9DebugDrawer mDebugDraw;
+    //GLDebugDrawer mDebugDraw;    
 };

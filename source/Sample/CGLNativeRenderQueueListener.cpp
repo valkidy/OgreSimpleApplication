@@ -1,14 +1,125 @@
 #include "CGLNativeRenderQueueListener.h"
+#include "D3d9Stuff.h"
+#include <stdio.h>
 
 static const std::string g_strManualObjectName = "GLNativeDebugDrawer";
 static const std::string g_strOpenGLRenderSystem = "OpenGL Rendering Subsystem";
 
-
+using namespace Ogre;
 #define ENABLE_NATIVE_RENDER_VERIFY 0
 
 #if (ENABLE_NATIVE_RENDER_VERIFY)
 void doNativeRenderQuads()
 {
+    LPDIRECT3DDEVICE9       pd3dDevice = NULL; // Our rendering device
+	LPDIRECT3DVERTEXBUFFER9 pVB        = NULL; // Buffer to hold vertices
+
+    Ogre::RenderWindow* mWindow = static_cast<Ogre::RenderWindow*>(Ogre::Root::getSingletonPtr()->getRenderTarget("Ogre Render Window"));
+	mWindow->getCustomAttribute( "D3DDEVICE", &pd3dDevice );
+
+
+	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
+    pd3dDevice->SetRenderState(D3DRS_DIFFUSEMATERIALSOURCE, Ogre::TVC_DIFFUSE);
+
+	// A structure for our custom vertex type
+	struct CUSTOMVERTEX
+	{
+        Ogre::Vector3 pos;      // The untransformed, 3D position for the vertex
+		Ogre::Vector3 normal;      // The untransformed, 3D position for the vertex
+		DWORD color;        // The vertex color
+	};
+	
+	// Our custom FVF, which describes our custom vertex structure
+	#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE)
+
+	#define SCALE_FACTOR 30
+
+	// Initialize three vertices for rendering a triangle
+	static const CUSTOMVERTEX cubeVertices[] =
+	{
+		// Bottom Face.  
+		{ Vector3(-1.0f, -1.0f, -1.0f) * SCALE_FACTOR, Vector3( 0.0f, -1.0f, 0.0f), 0xff000000, },
+		{ Vector3( 1.0f, -1.0f, -1.0f) * SCALE_FACTOR, Vector3( 0.0f, -1.0f, 0.0f), 0xff000000, },
+		{ Vector3( 1.0f, -1.0f,  1.0f) * SCALE_FACTOR, Vector3( 0.0f, -1.0f, 0.0f), 0xff000000, },
+		{ Vector3( 1.0f, -1.0f,  1.0f) * SCALE_FACTOR, Vector3( 0.0f, -1.0f, 0.0f), 0xff000000, },
+		{ Vector3(-1.0f, -1.0f,  1.0f) * SCALE_FACTOR, Vector3( 0.0f, -1.0f, 0.0f), 0xff000000, },
+		{ Vector3(-1.0f, -1.0f, -1.0f) * SCALE_FACTOR, Vector3( 0.0f, -1.0f, 0.0f), 0xff000000, },
+
+		// Top Face.  
+		{ Vector3(-1.0f,  1.3f, -1.0f) * SCALE_FACTOR, Vector3( 0.0f, 1.0f, 0.0f), 0xffffff00, },
+		{ Vector3(-1.0f,  1.3f,  1.0f) * SCALE_FACTOR, Vector3( 0.0f, 1.0f, 0.0f), 0xffffff00, },
+		{ Vector3( 1.0f,  1.3f,  1.0f) * SCALE_FACTOR, Vector3( 0.0f, 1.0f, 0.0f), 0xffffff00, },
+		{ Vector3( 1.0f,  1.3f,  1.0f) * SCALE_FACTOR, Vector3( 0.0f, 1.0f, 0.0f), 0xffffff00, },
+		{ Vector3( 1.0f,  1.3f, -1.0f) * SCALE_FACTOR, Vector3( 0.0f, 1.0f, 0.0f), 0xffffff00, },
+		{ Vector3(-1.0f,  1.3f, -1.0f) * SCALE_FACTOR, Vector3( 0.0f, 1.0f, 0.0f), 0xffffff00, },
+
+		// Far Face.  
+		{ Vector3(-1.0f, -1.0f, -1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f,-1.0f), 0x00ff0000, },
+		{ Vector3(-1.0f,  1.0f, -1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f,-1.0f), 0x00ff0000, },
+		{ Vector3( 1.0f,  1.0f, -1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f,-1.0f), 0x00ff0000, },
+		{ Vector3( 1.0f,  1.0f, -1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f,-1.0f), 0x00ff0000, },
+		{ Vector3( 1.0f, -1.0f, -1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f,-1.0f), 0x00ff0000, },
+		{ Vector3(-1.0f, -1.0f, -1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f,-1.0f), 0x00ff0000, },
+
+		// Right Face.  
+		{ Vector3( 1.0f, -1.0f, -1.0f) * SCALE_FACTOR, Vector3( 1.0f, 0.0f, 0.0f), 0x0000ff00, },
+		{ Vector3( 1.0f,  1.0f, -1.0f) * SCALE_FACTOR, Vector3( 1.0f, 0.0f, 0.0f), 0x0000ff00, },
+		{ Vector3( 1.0f,  1.0f,  1.0f) * SCALE_FACTOR, Vector3( 1.0f, 0.0f, 0.0f), 0x0000ff00, },
+		{ Vector3( 1.0f,  1.0f,  1.0f) * SCALE_FACTOR, Vector3( 1.0f, 0.0f, 0.0f), 0x0000ff00, },
+		{ Vector3( 1.0f, -1.0f,  1.0f) * SCALE_FACTOR, Vector3( 1.0f, 0.0f, 0.0f), 0x0000ff00, },
+		{ Vector3( 1.0f, -1.0f, -1.0f) * SCALE_FACTOR, Vector3( 1.0f, 0.0f, 0.0f), 0x0000ff00, },
+
+		// Front Face.
+		{ Vector3(-1.0f, -1.0f,  1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f, 1.0f), 0xff00ff00, },
+		{ Vector3( 1.0f, -1.0f,  1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f, 1.0f), 0x00ffff00, },
+		{ Vector3( 1.0f,  1.0f,  1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f, 1.0f), 0x0000ff00, },
+		{ Vector3( 1.0f,  1.0f,  1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f, 1.0f), 0x0000ff00, },
+		{ Vector3(-1.0f,  1.0f,  1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f, 1.0f), 0xffffff00, },
+		{ Vector3(-1.0f, -1.0f,  1.3f) * SCALE_FACTOR, Vector3( 0.0f, 0.0f, 1.0f), 0xff00ff00, },
+
+		// Left Face.  
+		{ Vector3(-1.3f, -1.0f, -1.0f) * SCALE_FACTOR, Vector3( -1.0f, 0.0f, 0.0f), 0xffff0000, },
+		{ Vector3(-1.3f, -1.0f,  1.0f) * SCALE_FACTOR, Vector3( -1.0f, 0.0f, 0.0f), 0xffff0000, },
+		{ Vector3(-1.3f,  1.0f,  1.0f) * SCALE_FACTOR, Vector3( -1.0f, 0.0f, 0.0f), 0xffff0000, },
+		{ Vector3(-1.3f,  1.0f,  1.0f) * SCALE_FACTOR, Vector3( -1.0f, 0.0f, 0.0f), 0xffff0000, },
+		{ Vector3(-1.3f,  1.0f, -1.0f) * SCALE_FACTOR, Vector3( -1.0f, 0.0f, 0.0f), 0xffff0000, },
+		{ Vector3(-1.3f, -1.0f, -1.0f) * SCALE_FACTOR, Vector3( -1.0f, 0.0f, 0.0f), 0xffff0000, },
+	};
+
+	
+	UINT primitiveCount = sizeof(cubeVertices)  / sizeof(CUSTOMVERTEX) / 3;
+
+	// Create the vertex buffer.
+	if( FAILED( pd3dDevice->CreateVertexBuffer( sizeof(cubeVertices),
+		0, D3DFVF_CUSTOMVERTEX,
+		D3DPOOL_DEFAULT, &pVB, NULL ) ) )
+	{
+		return;//E_FAIL;
+	}
+
+	// Fill the vertex buffer.
+	VOID* pVertices;
+	if( FAILED( pVB->Lock( 0, sizeof(cubeVertices), (void**)&pVertices, 0 ) ) )
+		return;// E_FAIL;
+	memcpy( pVertices, cubeVertices, sizeof(cubeVertices) );
+	pVB->Unlock();
+
+
+	
+
+	// Render the vertex buffer contents
+	pd3dDevice->SetStreamSource( 0, pVB, 0, sizeof(CUSTOMVERTEX) );
+	pd3dDevice->SetFVF( D3DFVF_CUSTOMVERTEX );
+	pd3dDevice->DrawPrimitive( D3DPT_TRIANGLELIST, 0, primitiveCount );
+
+	pVB->Release();
+
+/*
+    GLboolean depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
+	GLboolean stencilTestEnabled = glIsEnabled(GL_STENCIL_TEST);
+	glDisable(GL_STENCIL_TEST);
+
 	glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
 
@@ -85,7 +196,18 @@ void doNativeRenderQuads()
 	glTexCoord2f(0.005f, 0.995f); glVertex3f(-1.0f,  2.5f, -1.0f);
 
 	// All polygons have been drawn.
-	glEnd();	
+	glEnd();
+
+    // restore
+	if (depthTestEnabled)
+	{
+		glEnable(GL_DEPTH_TEST);
+	}
+	if (stencilTestEnabled)
+	{
+		glEnable(GL_STENCIL_TEST);
+	}
+*/
 }
 #endif
 
@@ -154,7 +276,7 @@ CGLNativeRenderSystemRenderQueueListener::renderQueueEnded(Ogre::uint8 queueGrou
 	// this queue - else you will never pass this if.
     if (queueGroupId != Ogre::RENDER_QUEUE_MAIN) 
         return;
-
+/*
 	// save matrices
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -163,7 +285,7 @@ CGLNativeRenderSystemRenderQueueListener::renderQueueEnded(Ogre::uint8 queueGrou
 	glMatrixMode(GL_TEXTURE);
 	glPushMatrix();
 	glLoadIdentity(); //Texture addressing should start out as direct.
-
+*/
 	Ogre::RenderSystem* renderSystem = mObject->_getManager()->getDestinationRenderSystem();
 	Ogre::Node* parentNode = mObject->getParentNode();
 	renderSystem->_setWorldMatrix(parentNode->_getFullTransform());
@@ -181,17 +303,11 @@ CGLNativeRenderSystemRenderQueueListener::renderQueueEnded(Ogre::uint8 queueGrou
     
 	//Set a clear pass to give the renderer a clear renderstate
 	mSceneMgr->_setPass(mPass, true, false);
-
-	GLboolean depthTestEnabled=glIsEnabled(GL_DEPTH_TEST);
-	glDisable(GL_DEPTH_TEST);
-	GLboolean stencilTestEnabled = glIsEnabled(GL_STENCIL_TEST);
-	glDisable(GL_STENCIL_TEST);
-
+/*
 	// save attribs
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-    // call native rendering function
-
+*/
+    // call native rendering function         
 #if (ENABLE_NATIVE_RENDER_VERIFY)
     doNativeRenderQuads();
 #else
@@ -200,18 +316,9 @@ CGLNativeRenderSystemRenderQueueListener::renderQueueEnded(Ogre::uint8 queueGrou
         mNativeRenderListener->doNativeRender();
     }				
 #endif
-
+/*
 	// restore original state
 	glPopAttrib();
-
-	if (depthTestEnabled)
-	{
-		glEnable(GL_DEPTH_TEST);
-	}
-	if (stencilTestEnabled)
-	{
-		glEnable(GL_STENCIL_TEST);
-	}
 
 	// restore matrices
 	glMatrixMode(GL_TEXTURE);
@@ -220,6 +327,7 @@ CGLNativeRenderSystemRenderQueueListener::renderQueueEnded(Ogre::uint8 queueGrou
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+*/
 }
 
 /* -------------------------------------------------------------------
@@ -232,6 +340,7 @@ CGLNativeDebugDrawer::CGLNativeDebugDrawer(const Ogre::Camera* camera, Ogre::Sce
     assert(camera && sceneMgr && dynamicsWorld);
 
     Ogre::String RenderSystemName = sceneMgr->getDestinationRenderSystem()->getName();
+    /*
     if (g_strOpenGLRenderSystem != RenderSystemName)
     {
         OGRE_EXCEPT(Ogre::Exception::ERR_NOT_IMPLEMENTED, 
@@ -239,6 +348,7 @@ CGLNativeDebugDrawer::CGLNativeDebugDrawer(const Ogre::Camera* camera, Ogre::Sce
 				"CGLNativeDebugDrawer::CGLNativeDebugDrawer");
         return;
     } // End if
+    */
 
     //use this Manual Object as a reference point for the native rendering
     Ogre::ManualObject *manObj; 
@@ -280,10 +390,7 @@ void
 CGLNativeDebugDrawer::doNativeRender()
 {
      if (mDynamicsWorld)
-     {         
-         glDisable(GL_TEXTURE_2D);
-	     glDisable(GL_LIGHTING);
-
+     {  
          mDynamicsWorld->debugDrawWorld();
      } // End if
 } 
