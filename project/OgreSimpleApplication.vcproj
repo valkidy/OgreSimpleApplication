@@ -223,6 +223,14 @@
 			Name="Sample"
 			>
 			<File
+				RelativePath="..\source\Sample\CNativeRenderQueueListener.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CNativeRenderQueueListener.h"
+				>
+			</File>
+			<File
 				RelativePath="..\source\Sample\CSampleModule.h"
 				>
 			</File>
@@ -254,14 +262,6 @@
 				Name="OpenGLSupport"
 				>
 				<File
-					RelativePath="..\source\Sample\CGLNativeRenderQueueListener.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\source\Sample\CGLNativeRenderQueueListener.h"
-					>
-				</File>
-				<File
 					RelativePath="..\source\Sample\GLDebugDrawer.cpp"
 					>
 				</File>
@@ -278,6 +278,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\source\Sample\GLNativeRender.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\GLNativeRender.h"
+					>
+				</File>
+				<File
 					RelativePath="..\source\Sample\GlutStuff.h"
 					>
 				</File>
@@ -291,6 +299,14 @@
 				</File>
 				<File
 					RelativePath="..\source\Sample\D3d9DebugDrawer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\D3d9NativeRender.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\source\Sample\D3d9NativeRender.h"
 					>
 				</File>
 				<File

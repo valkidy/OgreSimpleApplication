@@ -8,7 +8,7 @@
 
 // ogre
 #include <Ogre.h>
-#include <OIS/OIS.h>
+
 // bullet
 #include "btBulletDynamicsCommon.h"
 

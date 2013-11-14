@@ -47,8 +47,8 @@ COgreApplication::init()
     } // End for
 
     //render window    
-    //m_pRoot->setRenderSystem( m_pRoot->getRenderSystemByName("OpenGL Rendering Subsystem") );
-    m_pRoot->setRenderSystem( m_pRoot->getRenderSystemByName("Direct3D9 Rendering Subsystem") );    
+    m_pRoot->setRenderSystem( m_pRoot->getRenderSystemByName("OpenGL Rendering Subsystem") );
+    //m_pRoot->setRenderSystem( m_pRoot->getRenderSystemByName("Direct3D9 Rendering Subsystem") );    
     m_pRoot->initialise(false);
 
     HWND hWnd = CreateWin32Window(1024, 768, GetModuleHandle( NULL ));

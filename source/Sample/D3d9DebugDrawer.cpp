@@ -1,118 +1,89 @@
 #include "D3d9DebugDrawer.h"
 #include "D3d9Stuff.h"
-#include <stdio.h>
-
-#include "COgreHeader.h"
-
-// A structure for our custom vertex type
-struct D3D9VERTEX
-{
-    Ogre::Vector3 position;
-	//btVector3 position; // The untransformed, 3D position for the vertex			
-	DWORD color;        // The vertex color
-} mVertexBufferForLine[2];
 
 // Convert to 32bit pattern : (RGBA = 8888)
 DWORD getAsRGBA(const btVector3& valuef)
 {
-    float x = valuef.getX();
-    float y = valuef.getY();
-    float z = valuef.getZ();
-
     return D3DCOLOR_RGBA(
-        static_cast<WORD>(x*255), 
-        static_cast<WORD>(y*255), 
-        static_cast<WORD>(z*255),
+        static_cast<WORD>(valuef.getX()*255), 
+        static_cast<WORD>(valuef.getY()*255), 
+        static_cast<WORD>(valuef.getZ()*255),
         255);
-
-    /*
-    DWORD value32 = 0;
-    value32 =  (static_cast<WORD>(valuef.getX() * 255) << 24); // Red
-    value32 += (static_cast<WORD>(valuef.getY() * 255) << 16); // Green
-    value32 += (static_cast<WORD>(valuef.getZ() * 255) << 8 ); // Blue
-    value32 += (255); // Alpha = 255
-    
-    return value32;
-    */
 }
-
-        
+       
 D3d9DebugDrawer::D3d9DebugDrawer()
     :m_debugMode(0)
 {
+    mVertexBuffer2.index = 0;
+    mVertexBuffer2.size = SIZE_VERTEXBUFFER;
+    mVertexBuffer2.resize = false;
+    mVertexBuffer2.vertexBuffer = new D3D9VERTEX2[ SIZE_VERTEXBUFFER ];
 
+    mVertexBuffer3.index = 0;
+    mVertexBuffer3.size = SIZE_VERTEXBUFFER;
+    mVertexBuffer3.resize = false;
+    mVertexBuffer3.vertexBuffer = new D3D9VERTEX3[ SIZE_VERTEXBUFFER ];
 }
 
 D3d9DebugDrawer::~D3d9DebugDrawer()
 {
+    mVertexBuffer2.index = mVertexBuffer2.size = 0;
+    mVertexBuffer3.index = mVertexBuffer3.size = 0;
+    delete [] mVertexBuffer2.vertexBuffer;
+    delete [] mVertexBuffer3.vertexBuffer;
+}
+
+void    D3d9DebugDrawer::clearVertexBuffer()
+{    
+    if (mVertexBuffer2.resize)
+    {
+        mVertexBuffer2.size *= 2;
+
+        delete [] mVertexBuffer2.vertexBuffer;
+        mVertexBuffer2.vertexBuffer = new D3D9VERTEX2[ mVertexBuffer2.size ];
+    } // End if
+ 
+    mVertexBuffer2.index = 0;
+    mVertexBuffer2.resize = false;
+    memset(mVertexBuffer2.vertexBuffer, 0, sizeof(D3D9VERTEX2) * mVertexBuffer2.size);
+    
+    if (mVertexBuffer3.resize)
+    {
+        mVertexBuffer3.size *= 2;
+
+        delete [] mVertexBuffer3.vertexBuffer;
+        mVertexBuffer3.vertexBuffer = new D3D9VERTEX3[ mVertexBuffer3.size ];
+    } // End if
+ 
+    mVertexBuffer3.index = 0;
+    mVertexBuffer3.resize = false;
+    memset(mVertexBuffer3.vertexBuffer, 0, sizeof(D3D9VERTEX2) * mVertexBuffer3.size);
 }
 
 void	D3d9DebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& fromColor, const btVector3& toColor)
 {
-    LPDIRECT3DDEVICE9       pd3dDevice = NULL; // Our rendering device
-	LPDIRECT3DVERTEXBUFFER9 pVB        = NULL; // Buffer to hold vertices
+    UINT i = mVertexBuffer2.index;
+    if (i < (mVertexBuffer2.size - 2))
+    {
+        mVertexBuffer2.vertexBuffer[ i ].x = from.getX();
+        mVertexBuffer2.vertexBuffer[ i ].y = from.getY();
+        mVertexBuffer2.vertexBuffer[ i ].z = from.getZ();
+        mVertexBuffer2.vertexBuffer[ i ].color = getAsRGBA(fromColor);
 
-    Ogre::RenderWindow* mWindow = static_cast<Ogre::RenderWindow*>(Ogre::Root::getSingletonPtr()->getRenderTarget("Ogre Render Window"));
-	mWindow->getCustomAttribute( "D3DDEVICE", &pd3dDevice );
+        mVertexBuffer2.vertexBuffer[ i+1 ].x = to.getX();
+        mVertexBuffer2.vertexBuffer[ i+1 ].y = to.getY();
+        mVertexBuffer2.vertexBuffer[ i+1 ].z = to.getZ();
+        mVertexBuffer2.vertexBuffer[ i+1 ].color = getAsRGBA(toColor);
 
-    pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
-    pd3dDevice->SetRenderState(D3DRS_DIFFUSEMATERIALSOURCE, D3DMCS_COLOR1);
-    pd3dDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-
-	// custom FVF, which describes our custom vertex structure
-	#define D3DFVF_VERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE)
-
-    mVertexBufferForLine[0].position = Ogre::Vector3(from.getX(), from.getY(), from.getZ());    
-    mVertexBufferForLine[0].color = D3DCOLOR_RGBA(
-        static_cast<WORD>(fromColor.getX() * 255.0f),
-        static_cast<WORD>(fromColor.getY() * 255.0f),
-        static_cast<WORD>(fromColor.getZ() * 255.0f),
-        255);
-    
-    mVertexBufferForLine[1].position = Ogre::Vector3(to.getX(), to.getY(), to.getZ());        
-    mVertexBufferForLine[1].color = D3DCOLOR_RGBA(
-        static_cast<WORD>(toColor.getX() * 255.0f),
-        static_cast<WORD>(toColor.getY() * 255.0f),
-        static_cast<WORD>(toColor.getZ() * 255.0f),
-        255);   	
-	
-	UINT primitiveCount = sizeof(mVertexBufferForLine)  / sizeof(D3D9VERTEX) / 2;
-
-	// Create the vertex buffer.
-	if( FAILED( pd3dDevice->CreateVertexBuffer( sizeof(mVertexBufferForLine),
-		0, D3DFVF_VERTEX,
-		D3DPOOL_DEFAULT, &pVB, NULL ) ) )
-	{
-		return;//E_FAIL;
-	}
-
-	// Fill the vertex buffer.
-	VOID* pVertices;
-	if( FAILED( pVB->Lock( 0, sizeof(mVertexBufferForLine), (void**)&pVertices, 0 ) ) )
-		return;// E_FAIL;
-	memcpy( pVertices, mVertexBufferForLine, sizeof(mVertexBufferForLine) );
-	pVB->Unlock();
-
-	// Render the vertex buffer contents
-	pd3dDevice->SetStreamSource( 0, pVB, 0, sizeof(D3D9VERTEX) );
-	pd3dDevice->SetFVF( D3DFVF_VERTEX );
-	pd3dDevice->DrawPrimitive( D3DPT_LINELIST, 0, primitiveCount );
-
-	pVB->Release();
-    
-    /*
-    glBegin(GL_LINES);
-		glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());
-		glVertex3d(from.getX(), from.getY(), from.getZ());
-		glColor3f(toColor.getX(), toColor.getY(), toColor.getZ());
-		glVertex3d(to.getX(), to.getY(), to.getZ());
-	glEnd();
-    */
+        mVertexBuffer2.index += 2;
+    }
+    else
+        mVertexBuffer2.resize = true;   
 }
 
 void	D3d9DebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& color)
 {
-	drawLine(from,to,color,color);
+	drawLine(from, to, color, color);
 }
 
 void D3d9DebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVector3& color)

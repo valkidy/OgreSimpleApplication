@@ -1,6 +1,6 @@
 #include "CSamplePhysicModule.h"
 #include "CSamplePhysicUtility.h"
-#include "CGLNativeRenderQueueListener.h"
+#include "CNativeRenderQueueListener.h"
 
 #include "BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h"//picking
 #include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"//picking
@@ -96,7 +96,7 @@ CBulletPhysicManager::init()
     // init debug drawer
     m_sceneMgr = Ogre::Root::getSingletonPtr()->getSceneManager("DefaultSceneManager");
     m_camera = m_sceneMgr->getCamera("DefaultCamera");
-    m_debugDrawer = new CGLNativeDebugDrawer(m_camera, m_sceneMgr, m_dynamicsWorld);
+    m_debugDrawer = new CDebugDrawer(m_camera, m_sceneMgr, m_dynamicsWorld);
 
     // init picker
     m_picker.m_pickConstraint = 0;

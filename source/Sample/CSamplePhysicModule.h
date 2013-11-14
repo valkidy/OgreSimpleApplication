@@ -17,7 +17,7 @@ namespace Ogre
     class Camera;
 };
 
-class CGLNativeDebugDrawer;
+class CDebugDrawer;
 class CBulletPhysicManager 
 {
     struct btPick
@@ -66,7 +66,7 @@ private:
     btPick m_picker;
 
     // debug drawer
-    CGLNativeDebugDrawer* m_debugDrawer;
+    CDebugDrawer* m_debugDrawer;
       
     // ogre object
     Ogre::SceneManager* m_sceneMgr;
