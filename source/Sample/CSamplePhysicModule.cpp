@@ -102,9 +102,20 @@ CBulletPhysicManager::init()
     m_picker.m_pickConstraint = 0;
     m_picker.m_pickedBody = 0;
 
+    // create entity
+    Ogre::Entity* _pEntity = m_sceneMgr->createEntity("OgreHead", "robot.mesh");
+    assert(_pEntity);
+    
+    Ogre::SceneNode* _pNode = m_sceneMgr->getRootSceneNode()->createChildSceneNode("OgreHeadNode");
+    assert(_pNode);
+    _pNode->attachObject(_pEntity);    
+    _pNode->setPosition(0, 0, 0);
+    _pNode->setVisible(true);
+
     // build some regidBody
     btBuildShapeUtility::buildGroundShape(m_dynamicsWorld, m_collisionShapes);
-    btBuildShapeUtility::buildBoxShape(m_dynamicsWorld, m_collisionShapes);
+    //btBuildShapeUtility::buildBoxShape(m_dynamicsWorld, m_collisionShapes);
+    buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, m_triangleMeshes);
 }
 
 void
@@ -112,6 +123,14 @@ CBulletPhysicManager::release()
 {
     //remove picker
     removePickingConstraint();
+
+    //remove the tiranglemeshes
+    for (int j=0;j<m_triangleMeshes.size();j++)
+    {
+  	    btTriangleIndexVertexArray* triMesh = m_triangleMeshes[j];
+	    delete triMesh;
+    }
+    m_triangleMeshes.clear();
 
     //remove the rigidbodies from the dynamics world and delete them
     int i;
@@ -159,6 +178,21 @@ CBulletPhysicManager::simulate(double dt)
     if (m_dynamicsWorld)
     {            
 	    m_dynamicsWorld->stepSimulation(dt);
+
+        int numCollisionObjects = m_dynamicsWorld->getNumCollisionObjects();
+        for (int i=0;i<numCollisionObjects;++i)
+        {
+	        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
+	        btRigidBody* body = btRigidBody::upcast(obj);
+	        
+            Ogre::SceneNode* node = static_cast<Ogre::SceneNode*>(body->getUserPointer());
+            if (node)
+            {
+                const btTransform& trans = body->getWorldTransform();
+                node->setPosition(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+                node->setOrientation(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
+            }
+        }
     }
 } 
 
@@ -256,11 +290,13 @@ CBulletPhysicManager::dragPickingConstraint(float x, float y)
                 btCollisionShape* shape = m_picker.m_pickedBody->getCollisionShape();
                 if (shape)
                 {
+                    /*
                     btVector3 scale(1, 1, 1); 
                     const btTransform& transform = m_picker.m_pickedBody->getWorldTransform();
                     btScalar scaleRatio = m_picker.m_pickDist / (transform.getOrigin() - rayFrom).length();
                     
                     shape->setLocalScaling(scale*scaleRatio);
+                    */
                 } // End if                                
 			}
 		}

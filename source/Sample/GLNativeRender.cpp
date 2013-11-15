@@ -23,7 +23,7 @@ GLNativeRender::preRender()
 	glDisable(GL_STENCIL_TEST);
 
 	glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHTING);    
 }
 
 void 

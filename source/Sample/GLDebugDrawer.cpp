@@ -3,9 +3,7 @@
 #include "GLDebugFont.h"
 #include "GlutStuff.h"
 
-
-
-#include <stdio.h> //printf debugging
+#include <stdio.h>
 GLDebugDrawer::GLDebugDrawer()
 :m_debugMode(0)
 {
@@ -20,8 +18,8 @@ void	GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btV
 {
 	glBegin(GL_LINES);
 		glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());
-		glVertex3d(from.getX(), from.getY(), from.getZ());
-		glColor3f(toColor.getX(), toColor.getY(), toColor.getZ());
+		glVertex3d(from.getX(), from.getY(), from.getZ());		
+        glColor3f(toColor.getX(), toColor.getY(), toColor.getZ());
 		glVertex3d(to.getX(), to.getY(), to.getZ());
 	glEnd();
 }

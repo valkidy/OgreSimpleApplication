@@ -54,6 +54,7 @@ protected:
 private:
     // bullet shape manage container
     btAlignedObjectArray<btCollisionShape*>	m_collisionShapes;
+    btAlignedObjectArray<btTriangleIndexVertexArray*> m_triangleMeshes;
     
     // bullet 
     btBroadphaseInterface*	m_broadphase;

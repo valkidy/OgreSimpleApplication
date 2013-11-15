@@ -23,3 +23,9 @@ ConvertOgreVectorTobtVector(const Ogre::Vector3& v);
 */
 bool
 makeRayCastingSegment(float mouse_x, float mouse_y, Ogre::Camera* cam, btVector3& rayFrom, btVector3& rayTo);
+
+bool
+buildRigidBodyFromOgreEntity(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld, 
+                             btAlignedObjectArray<btCollisionShape*>& collisionShapes,
+                             btAlignedObjectArray<btTriangleIndexVertexArray*>& triangleMeshes);
+
