@@ -1,9 +1,17 @@
 #include "CSamplePhysicModule.h"
 #include "CSamplePhysicUtility.h"
+#include "CCharacterController.h"
 #include "CNativeRenderQueueListener.h"
 
-#include "BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h"//picking
-#include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"//picking
+// picking
+#include "BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h"
+#include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"
+
+// character controller
+#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
+
+#include "BulletDynamics/Character/btKinematicCharacterController.h"
 
 #include "Win32Utility.h"
 
@@ -30,6 +38,9 @@ public:
         btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0)));
         btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0,groundMotionState,groundShape,btVector3(0,0,0));
         btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+        groundRigidBody->setRestitution(0.0f);
+        groundRigidBody->setFriction(1.0f);
+
         dynamicsWorld->addRigidBody(groundRigidBody);
 
         collisionShapes.push_back(groundShape);
@@ -91,7 +102,7 @@ CBulletPhysicManager::init()
  
     // The world.
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);        
-    m_dynamicsWorld->setGravity(btVector3(0,-10,0));
+    m_dynamicsWorld->setGravity(btVector3(0,-10.0f,0));
 
     // init debug drawer
     m_sceneMgr = Ogre::Root::getSingletonPtr()->getSceneManager("DefaultSceneManager");
@@ -103,7 +114,7 @@ CBulletPhysicManager::init()
     m_picker.m_pickedBody = 0;
 
     // create entity
-    Ogre::Entity* _pEntity = m_sceneMgr->createEntity("OgreHead", "robot.mesh");
+    Ogre::Entity* _pEntity = m_sceneMgr->createEntity("OgreHead", "fish.mesh");
     assert(_pEntity);
     
     Ogre::SceneNode* _pNode = m_sceneMgr->getRootSceneNode()->createChildSceneNode("OgreHeadNode");
@@ -113,14 +124,29 @@ CBulletPhysicManager::init()
     _pNode->setVisible(true);
 
     // build some regidBody
-    btBuildShapeUtility::buildGroundShape(m_dynamicsWorld, m_collisionShapes);
+    buildHeightFieldTerrainFromImage(NULL, m_dynamicsWorld, m_collisionShapes);
+    //btBuildShapeUtility::buildGroundShape(m_dynamicsWorld, m_collisionShapes);
     //btBuildShapeUtility::buildBoxShape(m_dynamicsWorld, m_collisionShapes);
     buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, m_triangleMeshes);
+        
+    btTransform startTransform;
+	startTransform.setIdentity();
+	startTransform.setOrigin (btVector3(0.0, 4.0, 0.0));
+	
+    // add character
+    m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
 }
 
 void
 CBulletPhysicManager::release()
 {
+    //delete character
+    if (m_character)
+    {
+        delete m_character;
+        m_character = NULL;
+    }
+
     //remove picker
     removePickingConstraint();
 
@@ -176,15 +202,20 @@ void
 CBulletPhysicManager::simulate(double dt)
 {    
     if (m_dynamicsWorld)
-    {            
+    {   
+        // LOG("dt : 1/60 = %.3f, %.3f", dt, 1/60.0f);        
 	    m_dynamicsWorld->stepSimulation(dt);
+        //m_dynamicsWorld->stepSimulation(1/60.0f, 4);
+        
 
         int numCollisionObjects = m_dynamicsWorld->getNumCollisionObjects();
         for (int i=0;i<numCollisionObjects;++i)
         {
 	        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
 	        btRigidBody* body = btRigidBody::upcast(obj);
-	        
+	        if (!body)
+                continue;
+
             Ogre::SceneNode* node = static_cast<Ogre::SceneNode*>(body->getUserPointer());
             if (node)
             {

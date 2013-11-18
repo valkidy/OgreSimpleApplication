@@ -29,3 +29,10 @@ buildRigidBodyFromOgreEntity(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld,
                              btAlignedObjectArray<btCollisionShape*>& collisionShapes,
                              btAlignedObjectArray<btTriangleIndexVertexArray*>& triangleMeshes);
 
+/*
+ |
+ */
+bool
+buildHeightFieldTerrainFromImage(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld, 
+                             btAlignedObjectArray<btCollisionShape*>& collisionShapes);
+                             

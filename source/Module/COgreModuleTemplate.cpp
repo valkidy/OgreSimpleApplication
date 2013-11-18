@@ -25,8 +25,8 @@ CSimpleModuleTemplate::createScene()
 	m_pCamera->setFarClipDistance(10000.0f);
 	//m_pCamera->setNearClipDistance(1.0f);
     m_pCamera->setNearClipDistance(0.1f);
-    m_pCamera->setFOVy(Ogre::Radian(Ogre::Degree(45.0f)));
-    //m_pCamera->setFOVy(Ogre::Radian(Ogre::Degree(90.0f))); 
+    //m_pCamera->setFOVy(Ogre::Radian(Ogre::Degree(45.0f)));
+    m_pCamera->setFOVy(Ogre::Radian(Ogre::Degree(90.0f))); 
 	m_pCamera->setAspectRatio(4.0f/3.0f);		
 	m_pCamera->setPosition(Ogre::Vector3(0, 5.0f, -30.0f));
 	m_pCamera->lookAt(Ogre::Vector3(0,0,0));

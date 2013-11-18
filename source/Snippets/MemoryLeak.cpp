@@ -1,5 +1,5 @@
 /*
- | This file is code snippets for memory check utility 
+ | This file describes code snippets for memory check utility 
  */
 #include <stdio.h>
 #include <crtdbg.h>

@@ -17,7 +17,11 @@ namespace Ogre
     class Camera;
 };
 
+class btKinematicCharacterController;
+class btPairCachingGhostObject;
+
 class CDebugDrawer;
+class CCharacterController;
 class CBulletPhysicManager 
 {
     struct btPick
@@ -72,4 +76,11 @@ private:
     // ogre object
     Ogre::SceneManager* m_sceneMgr;
     Ogre::Camera* m_camera;
+
+    // character controller
+    CCharacterController* m_character;
+
+public:
+    CCharacterController* getCharacter(){ return m_character;}
+
 }; // End of CBulletPhysicManager

@@ -1,5 +1,6 @@
 #include "CSampleModuleRayCasting.h"
 #include "CSamplePhysicModule.h"
+#include "CCharacterController.h"
 
 CSampleModuleRayCasting::CSampleModuleRayCasting() :
     m_pBulletPhysicManager(NULL)
@@ -76,4 +77,29 @@ CSampleModuleRayCasting::mouseMoved(const OIS::MouseEvent &evt)
     return true;
 }
 
+bool 
+CSampleModuleRayCasting::keyReleased(const OIS::KeyCode& iKeyCode)
+{
+    CSimpleModuleTemplate::keyReleased(iKeyCode);
+
+    btVector3 dir;
+    dir.setZero();
+
+    switch (iKeyCode)
+    {
+    case OIS::KC_LEFT:
+        dir.setX(-1.0f);
+        break;
+    case OIS::KC_RIGHT:
+        dir.setX(1.0f);
+        break;
+    }
+
+    if (m_pBulletPhysicManager)
+    {
+        m_pBulletPhysicManager->getCharacter()->setLinearVelocity(dir);
+    }
+        
+    return true;
+}
     
