@@ -97,7 +97,7 @@ CSampleModuleRayCasting::keyReleased(const OIS::KeyCode& iKeyCode)
 
     if (m_pBulletPhysicManager)
     {
-        m_pBulletPhysicManager->getCharacter()->setLinearVelocity(dir);
+        // m_pBulletPhysicManager->getCharacter()->setLinearVelocity(dir);
     }
         
     return true;

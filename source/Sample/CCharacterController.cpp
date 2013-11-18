@@ -68,6 +68,6 @@ CCharacterController::~CCharacterController()
 void 
 CCharacterController::setLinearVelocity(const btVector3& velocity)
 {
-    btScalar walkSpeed = 0.05f;
+    btScalar walkSpeed = 0.05f;    
     m_character->setWalkDirection(velocity*walkSpeed);
 }

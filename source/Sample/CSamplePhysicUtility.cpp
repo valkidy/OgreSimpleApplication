@@ -1,7 +1,9 @@
-#include "CSamplePhysicUtility.h"
-#include "OgreMath.h"
+#include "Win32Utility.h"
 
+#include "OgreMath.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+
+#include "CSamplePhysicUtility.h"
 
 btVector3
 ConvertOgreVectorTobtVector(const Ogre::Vector3& v) { return btVector3(v.x, v.y, v.z);}
@@ -239,7 +241,7 @@ enum eTerrainModel {
 };
 
 
-static const int s_gridSize = 16 + 1;// 64 + 1;  // must be (2^N) + 1
+static const int s_gridSize = 64 + 1;  // must be (2^N) + 1
 static const float s_gridSpacing = 5.0;
 static const float s_gridHeightScale = 10.2;
 
@@ -248,24 +250,86 @@ typedef unsigned char byte_t;
 byte_t*
 getRawHeightfieldData(eTerrainModel model, PHY_ScalarType type, btScalar& minHeight, btScalar& maxHeight);
 
+Ogre::ulong upper_of_power_2(Ogre::ulong value)
+{
+    --value;
+
+    for (int i=1; i<=16; i<<=1)
+        value |= (value >> i);
+
+    ++value;
+
+    return value;
+}
+
 bool
 buildHeightFieldTerrainFromImage(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld, 
                              btAlignedObjectArray<btCollisionShape*>& collisionShapes)
 {
+    std::string filename("terrain.png");
+    Ogre::Image img;
+    img.load(filename, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        
+    if (!img.getData())
+    {
+        LOG("LoadImage name=%s failed!", filename.c_str());
+        return false;
+    }
+    
+    size_t grid_w = upper_of_power_2(img.getWidth())/16 + 1;
+    size_t grid_h = upper_of_power_2(img.getHeight())/16 + 1;
+    
+    LOG("LoadImage name=%s, width=%d, height=%d, width^2+1=%d, height^2+1=%d",
+        filename.c_str(), img.getWidth(), img.getHeight(), grid_w, grid_h);     
+    img.resize(grid_w, grid_h);
+/*
+    size_t bufSize = sizeof(float) * img.getSize();
+    int size = img.getSize();
+    static Ogre::uchar* data = new Ogre::uchar[ bufSize ];
+    const Ogre::uchar* rawdata = img.getData();
+    memset(data, 0, bufSize);
+    
+    //float f;
+    for (int i = 0 ; i < size ; ++i)
+    {        
+        data[sizeof(float) * i] = (float)rawdata[i];
+    }
+*/    
+    Ogre::PixelBox box = img.getPixelBox(0,0);
+    float* src = static_cast<float*>(box.data);
+
+
+    const float* rawdata = (float*)img.getData();
+    float *data = new float[grid_w * grid_w];
+    
+    for (int i = 0; i < grid_w; i++)
+    {
+        memcpy(data + grid_w * i, src + grid_w * (grid_w - i - 1), sizeof(float) * grid_w);
+    }
+
+
+    //memcpy(data, , bufSize);
+
+    
+    //    LOG("%d" ,data[i]);
+
     // parameter    
     int m_upAxis = 1;
     eTerrainModel m_model = eFractal;
     PHY_ScalarType m_type = PHY_FLOAT;
     bool flipQuadEdges = false;
         
-    btScalar m_minHeight, m_maxHeight;
+    btScalar m_minHeight = -20.0f, m_maxHeight = 20.0f;
 
-	static byte_t* m_rawHeightfieldData = getRawHeightfieldData(m_model, m_type, m_minHeight, m_maxHeight);
-	btAssert(m_rawHeightfieldData && "failed to create raw heightfield");
+	static byte_t* m_rawHeightfieldData = getRawHeightfieldData(m_model, m_type, m_minHeight, m_maxHeight); 
+	//btAssert(m_rawHeightfieldData && "failed to create raw heightfield");
     
-	btHeightfieldTerrainShape * heightfieldShape =  
+    //for (int i = 0 ; i < bufSize ; ++i)
+    //    LOG("%d" ,m_rawHeightfieldData[i]);
+
+	btHeightfieldTerrainShape *heightfieldShape =  
         new btHeightfieldTerrainShape(s_gridSize, s_gridSize,
-                                      m_rawHeightfieldData,
+                                      data,
                                       s_gridHeightScale,
                                       m_minHeight, m_maxHeight,
                                       m_upAxis, m_type, flipQuadEdges);

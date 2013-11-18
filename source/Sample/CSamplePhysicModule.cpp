@@ -127,14 +127,14 @@ CBulletPhysicManager::init()
     buildHeightFieldTerrainFromImage(NULL, m_dynamicsWorld, m_collisionShapes);
     //btBuildShapeUtility::buildGroundShape(m_dynamicsWorld, m_collisionShapes);
     //btBuildShapeUtility::buildBoxShape(m_dynamicsWorld, m_collisionShapes);
-    buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, m_triangleMeshes);
+    //buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, m_triangleMeshes);
         
     btTransform startTransform;
 	startTransform.setIdentity();
 	startTransform.setOrigin (btVector3(0.0, 4.0, 0.0));
 	
     // add character
-    m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
+    //m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
 }
 
 void

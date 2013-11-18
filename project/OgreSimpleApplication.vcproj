@@ -223,6 +223,14 @@
 			Name="Sample"
 			>
 			<File
+				RelativePath="..\source\Sample\CCharacterController.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CCharacterController.h"
+				>
+			</File>
+			<File
 				RelativePath="..\source\Sample\CNativeRenderQueueListener.cpp"
 				>
 			</File>
