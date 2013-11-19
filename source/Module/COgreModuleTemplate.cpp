@@ -43,6 +43,7 @@ CSimpleModuleTemplate::createScene()
     //build skybox
     m_pSceneMgr->setSkyBox(true, "DefaultSkyBox");
     //build plane
+    /*
     Ogre::Plane* _pPlane = new Ogre::MovablePlane("Plane");
 	_pPlane->d = 0;
 	_pPlane->normal = Ogre::Vector3::UNIT_Y;
@@ -56,7 +57,7 @@ CSimpleModuleTemplate::createScene()
 	Ogre::SceneNode* _pPlaneNode = m_pSceneMgr->getRootSceneNode()->createChildSceneNode("PlaneNode");
 	_pPlaneNode->attachObject(_pPlaneEntity);
 	_pPlaneNode->setPosition(Ogre::Vector3::ZERO);
-
+    */
 	
     CPanelManager::getSingleton().CreateWidget<ParamsPanel>("StatPanel", &UpdateStats);
 }

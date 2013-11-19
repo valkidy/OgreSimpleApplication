@@ -68,70 +68,7 @@ makeRayCastingSegment(float mouse_x, float mouse_y, Ogre::Camera* cam, btVector3
     return true;
 } //End for makeRayCastingResult
 
-/* ----------------------------------------------------------------------- 
- | the function describe build btRigidBody from Ogre mesh :   
- |
- | @prama in : Ogre entity (use as a single object)
- | @pamra out : return true if build success and add collision shape to dynamicsworld
-   ----------------------------------------------------------------------- */
-void
-getVertexBuffer(Ogre::Entity* ent, void* &vertices, size_t& vertexCount, void* &indices, size_t& indexCount);
-bool
-buildRigidBodyFromOgreEntity(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld, 
-                             btAlignedObjectArray<btCollisionShape*>& collisionShapes,
-                             btAlignedObjectArray<btTriangleIndexVertexArray*>& triangleMeshes)
-{
-    void *vertices, *indices;
-    size_t vertexCount = 0, indexCount = 0;
-    
-    getVertexBuffer(ent, vertices, vertexCount, indices, indexCount);
-       
-    btScalar mass(1.0f);	
-    btVector3 localInertia(0,0,0);
-    //btCollisionShape* colShape = new btCapsuleShape();    
-
-    btTriangleMesh* trimesh = new btTriangleMesh();
-	// btVector3 localScaling(6.f,6.f,6.f);
-			
-    Ogre::Vector3* vert = (Ogre::Vector3*)vertices;
-    Ogre::ulong* index = (Ogre::ulong*)indices;
-
-	for (int i=0 ; i<vertexCount ; i++)
-	{
-		int index0 = index[i*3];
-		int index1 = index[i*3+1];
-		int index2 = index[i*3+2];
-
-        btVector3 vertex0(vert[index0].x, vert[index0].y, vert[index0].z);
-        btVector3 vertex1(vert[index1].x, vert[index1].y, vert[index1].z);
-        btVector3 vertex2(vert[index2].x, vert[index2].y, vert[index2].z);
-
-		trimesh->addTriangle(vertex0,vertex1,vertex2);
-	}
-
-    delete [] vertices;
-    delete [] indices;
-    triangleMeshes.push_back(trimesh);
-
-    btCollisionShape* colShape = new btConvexTriangleMeshShape(trimesh);
-    const btVector3& scale = colShape->getLocalScaling();
-    colShape->calculateLocalInertia(mass,localInertia);
-    collisionShapes.push_back(colShape);
-    
-    btTransform trans;
-    trans.setIdentity();
-    btDefaultMotionState* motionState = new btDefaultMotionState(trans);
-    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,motionState,colShape,localInertia);
-    btRigidBody* body = new btRigidBody(rbInfo);
-    dynamicsWorld->addRigidBody(body);
-    
-    // link RigidBody and SceneNode
-    Ogre::SceneNode* node = ent->getParentSceneNode();
-    body->setUserPointer((void*)node);
-    
-    return true;
-}
-
+//////////////////////////////////////////////////////////////////////////////////////////////////
 /* ----------------------------------------------------------------------- 
  | the function describe retrieve vertexbuffer from Ogre entity :   
  | (Ref:http://www.ogre3d.org/tikiwiki/tiki-index.php?page=RetrieveVertexData)
@@ -141,7 +78,6 @@ buildRigidBodyFromOgreEntity(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld,
    ----------------------------------------------------------------------- */
 void
 getVertexBuffer(Ogre::Entity* ent, void* &vertices, size_t& vertexCount, void* &indices, size_t& indexCount)
-//getVertexBuffer(Ogre::Entity* ent, (void*)&vertices, size_t& vertexCount, (void*)&indices, size_t& indexCount)
 {
     bool added_shared = false;
     size_t current_offset = 0;
@@ -234,503 +170,204 @@ getVertexBuffer(Ogre::Entity* ent, void* &vertices, size_t& vertexCount, void* &
     } // End for
 }
 
-// what type of terrain is generated?
-enum eTerrainModel {
-	eRadial			= 1,	// deterministic
-	eFractal		= 2	// random
-};
-
-
-static const int s_gridSize = 64 + 1;  // must be (2^N) + 1
-static const float s_gridSpacing = 5.0;
-static const float s_gridHeightScale = 10.2;
-
-typedef unsigned char byte_t;
-
-byte_t*
-getRawHeightfieldData(eTerrainModel model, PHY_ScalarType type, btScalar& minHeight, btScalar& maxHeight);
-
-Ogre::ulong upper_of_power_2(Ogre::ulong value)
-{
-    --value;
-
-    for (int i=1; i<=16; i<<=1)
-        value |= (value >> i);
-
-    ++value;
-
-    return value;
-}
-
+/* ----------------------------------------------------------------------- 
+ | the function describe build btRigidBody from Ogre mesh :   
+ |
+ | @prama in : Ogre entity (use as a single object)
+ | @pamra out : return true if build success and add collision shape to dynamicsworld
+   ----------------------------------------------------------------------- */
 bool
-buildHeightFieldTerrainFromImage(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld, 
-                             btAlignedObjectArray<btCollisionShape*>& collisionShapes)
+buildRigidBodyFromOgreEntity(Ogre::Entity* ent,
+                             btDynamicsWorld* dynamicsWorld, 
+                             btAlignedObjectArray<btCollisionShape*>& collisionShapes,
+                             void* &data)
 {
-    std::string filename("terrain.png");
-    Ogre::Image img;
-    img.load(filename, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-        
-    if (!img.getData())
-    {
-        LOG("LoadImage name=%s failed!", filename.c_str());
-        return false;
-    }
+    void *vertices, *indices;
+    size_t vertexCount = 0, indexCount = 0;
     
-    size_t grid_w = upper_of_power_2(img.getWidth())/16 + 1;
-    size_t grid_h = upper_of_power_2(img.getHeight())/16 + 1;
+    getVertexBuffer(ent, vertices, vertexCount, indices, indexCount);
+       
+    btScalar mass(1.0f);	
+    btVector3 localInertia(0,0,0);
     
-    LOG("LoadImage name=%s, width=%d, height=%d, width^2+1=%d, height^2+1=%d",
-        filename.c_str(), img.getWidth(), img.getHeight(), grid_w, grid_h);     
-    img.resize(grid_w, grid_h);
-/*
-    size_t bufSize = sizeof(float) * img.getSize();
-    int size = img.getSize();
-    static Ogre::uchar* data = new Ogre::uchar[ bufSize ];
-    const Ogre::uchar* rawdata = img.getData();
-    memset(data, 0, bufSize);
+    data = new btTriangleMesh();
+    btTriangleMesh* trimesh = static_cast<btTriangleMesh*>(data);
+    btAssert(trimesh);
+
+    Ogre::Vector3* vert = (Ogre::Vector3*)vertices;
+    Ogre::ulong* index = (Ogre::ulong*)indices;
+
+	for (size_t i=0 ; i<vertexCount ; i++)
+	{
+		int index0 = index[i*3];
+		int index1 = index[i*3+1];
+		int index2 = index[i*3+2];
+
+        btVector3 vertex0(vert[index0].x, vert[index0].y, vert[index0].z);
+        btVector3 vertex1(vert[index1].x, vert[index1].y, vert[index1].z);
+        btVector3 vertex2(vert[index2].x, vert[index2].y, vert[index2].z);
+
+		trimesh->addTriangle(vertex0,vertex1,vertex2);
+	}
+
+    delete [] vertices;
+    delete [] indices;
     
-    //float f;
-    for (int i = 0 ; i < size ; ++i)
-    {        
-        data[sizeof(float) * i] = (float)rawdata[i];
-    }
-*/    
-    Ogre::PixelBox box = img.getPixelBox(0,0);
-    float* src = static_cast<float*>(box.data);
-
-
-    const float* rawdata = (float*)img.getData();
-    float *data = new float[grid_w * grid_w];
+    btCollisionShape* colShape = new btConvexTriangleMeshShape(trimesh);
+    const btVector3& scale = colShape->getLocalScaling();
+    colShape->calculateLocalInertia(mass,localInertia);
+    collisionShapes.push_back(colShape);
     
-    for (int i = 0; i < grid_w; i++)
-    {
-        memcpy(data + grid_w * i, src + grid_w * (grid_w - i - 1), sizeof(float) * grid_w);
-    }
-
-
-    //memcpy(data, , bufSize);
-
+    btTransform trans;
+    trans.setIdentity();
+    btDefaultMotionState* motionState = new btDefaultMotionState(trans);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,motionState,colShape,localInertia);
+    btRigidBody* body = new btRigidBody(rbInfo);
+    dynamicsWorld->addRigidBody(body);
     
-    //    LOG("%d" ,data[i]);
-
-    // parameter    
-    int m_upAxis = 1;
-    eTerrainModel m_model = eFractal;
-    PHY_ScalarType m_type = PHY_FLOAT;
-    bool flipQuadEdges = false;
-        
-    btScalar m_minHeight = -20.0f, m_maxHeight = 20.0f;
-
-	static byte_t* m_rawHeightfieldData = getRawHeightfieldData(m_model, m_type, m_minHeight, m_maxHeight); 
-	//btAssert(m_rawHeightfieldData && "failed to create raw heightfield");
-    
-    //for (int i = 0 ; i < bufSize ; ++i)
-    //    LOG("%d" ,m_rawHeightfieldData[i]);
-
-	btHeightfieldTerrainShape *heightfieldShape =  
-        new btHeightfieldTerrainShape(s_gridSize, s_gridSize,
-                                      data,
-                                      s_gridHeightScale,
-                                      m_minHeight, m_maxHeight,
-                                      m_upAxis, m_type, flipQuadEdges);
-	btAssert(heightfieldShape && "null heightfield");
-
-	// scale the shape
-	btVector3 localScaling(25.0f, 15.0f, 25.0f); // = getUpVector(m_upAxis, s_gridSpacing, 1.0);
-	heightfieldShape->setLocalScaling(localScaling);
-
-    //
-    collisionShapes.push_back(heightfieldShape);
-
-    // rigidBody
-    btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0)));
-    btRigidBody::btRigidBodyConstructionInfo cInfo(0, groundMotionState, heightfieldShape, btVector3(0,0,0));
-    btRigidBody* groundRigidBody = new btRigidBody(cInfo);        	
-	// groundRigidBody->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
-
-    dynamicsWorld->addRigidBody(groundRigidBody);
+    // link RigidBody and SceneNode
+    Ogre::SceneNode* node = ent->getParentSceneNode();
+    body->setUserPointer((void*)node);
     
     return true;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-static int getByteSize
-(
-PHY_ScalarType type
-)
+////////////////////////////////////////////////////////////////////////////////////////////
+/* ----------------------------------------------------------------------- 
+ | utility class for get height field vertices data from bullet to construct ogre mesh
+ | 
+ | @prama in : manual object, material name
+   ----------------------------------------------------------------------- */
+class btHeightFieldProcessor : public btTriangleCallback
 {
-	int size = 0;
+public:
+    btHeightFieldProcessor(Ogre::ManualObject* _obj, const Ogre::String& strMaterialName) :
+        m_obj(_obj) ,m_triangleId(-1)
+        { 
+            btAssert(m_obj); 
+            m_obj->begin(strMaterialName, Ogre::RenderOperation::OT_TRIANGLE_LIST); 
+        }
+    ~btHeightFieldProcessor() { m_obj->end();}
 
-	switch (type) {
-	case PHY_FLOAT:
-		size = sizeof(float);
-		break;
+	virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex)
+	{   
+        int triangleId = triangleIndex + partId;        
+        m_uv = (triangleId != m_triangleId) ? 0 : 1.0f;
+                        
+        // first triangle : (0,0) (0,1) (1,0)
+        // second triangle: (1,0) (0,1) (1,1)
+        m_obj->position(triangle[0].getX(), triangle[0].getY(), triangle[0].getZ());
+        m_obj->textureCoord(m_uv, 0);
+        m_obj->position(triangle[1].getX(), triangle[1].getY(), triangle[1].getZ());
+        m_obj->textureCoord(0, 1);
+        m_obj->position(triangle[2].getX(), triangle[2].getY(), triangle[2].getZ());
+        m_obj->textureCoord(1, m_uv);
 
-	case PHY_UCHAR:
-		size = sizeof(unsigned char);
-		break;
-
-	case PHY_SHORT:
-		size = sizeof(short);
-		break;
-
-	default:
-		btAssert(!"Bad heightfield data type");
+        m_triangleId = triangleId;
 	}
 
-	return size;
-}
+protected:
+    Ogre::ManualObject* m_obj;
+    
+    int m_triangleId;
+    Ogre::Real m_uv;
+};
 
-
-
-static float
-convertToFloat
-(
-const byte_t * p,
-PHY_ScalarType type
-)
+/* ----------------------------------------------------------------------- 
+ | build bullet height field shape and generate ogre mesh from grayscale image
+ | 
+ | @param in : 
+ | @param out: raw data of height field terrain
+   ----------------------------------------------------------------------- */
+bool
+buildHeightFieldTerrainFromImage(const Ogre::String& filename, 
+                                 btDynamicsWorld* dynamicsWorld, 
+                                 btAlignedObjectArray<btCollisionShape*>& collisionShapes,
+                                 void* &data)
 {
-	btAssert(p);
-
-	switch (type) {
-	case PHY_FLOAT:
-		{
-			float * pf = (float *) p;
-			return *pf;
-		}
-
-	case PHY_UCHAR:
-		{
-			unsigned char * pu = (unsigned char *) p;
-			return ((*pu) * s_gridHeightScale);
-		}
-
-	case PHY_SHORT:
-		{
-			short * ps = (short *) p;
-			return ((*ps) * s_gridHeightScale);
-		}
-
-	default:
-		btAssert(!"bad type");
-	}
-
-	return 0;
-}
-
-
-
-static float
-getGridHeight
-(
-byte_t * grid,
-int i,
-int j,
-PHY_ScalarType type
-)
-{
-	btAssert(grid);
-	btAssert(i >= 0 && i < s_gridSize);
-	btAssert(j >= 0 && j < s_gridSize);
-
-	int bpe = getByteSize(type);
-	btAssert(bpe > 0 && "bad bytes per element");
-
-	int idx = (j * s_gridSize) + i;
-	long offset = ((long) bpe) * idx;
-
-	byte_t * p = grid + offset;
-
-	return convertToFloat(p, type);
-}
-
-
-
-static void
-convertFromFloat
-(
-byte_t * p,
-float value,
-PHY_ScalarType type
-)
-{
-	btAssert(p && "null");
-
-	switch (type) {
-	case PHY_FLOAT:
-		{
-			float * pf = (float *) p;
-			*pf = value;
-		}
-		break;
-
-	case PHY_UCHAR:
-		{
-			unsigned char * pu = (unsigned char *) p;
-			*pu = (unsigned char) (value / s_gridHeightScale);
-		}
-		break;
-
-	case PHY_SHORT:
-		{
-			short * ps = (short *) p;
-			*ps = (short) (value / s_gridHeightScale);
-		}
-		break;
-
-	default:
-		btAssert(!"bad type");
-	}
-}
-
-
-
-// creates a radially-varying heightfield
-static void
-setRadial
-(
-byte_t * grid,
-int bytesPerElement,
-PHY_ScalarType type,
-float phase = 0.0
-)
-{
-	btAssert(grid);
-	btAssert(bytesPerElement > 0);
-
-	// min/max
-	float period = 0.5 / s_gridSpacing;
-	float floor = 0.0;
-	float min_r = 3.0 * sqrt(s_gridSpacing);
-	float magnitude = 50.0 * sqrt(s_gridSpacing);
-
-	// pick a base_phase such that phase = 0 results in max height
-	//   (this way, if you create a heightfield with phase = 0,
-	//    you can rely on the min/max heights that result)
-	float base_phase = (0.5 * SIMD_PI) - (period * min_r);
-	phase += base_phase;
-
-	// center of grid
-	float cx = 0.5 * s_gridSize * s_gridSpacing;
-	float cy = cx;		// assume square grid
-	byte_t * p = grid;
-	for (int i = 0; i < s_gridSize; ++i) {
-		float x = i * s_gridSpacing;
-		for (int j = 0; j < s_gridSize; ++j) {
-			float y = j * s_gridSpacing;
-
-			float dx = x - cx;
-			float dy = y - cy;
-
-			float r = sqrt((dx * dx) + (dy * dy));
-
-			float z = period;
-			if (r < min_r) {
-				r = min_r;
-			}
-			z = (1.0 / r) * sin(period * r + phase);
-			if (z > period) {
-				z = period;
-			} else if (z < -period) {
-				z = -period;
-			}
-			z = floor + magnitude * z;
-
-			convertFromFloat(p, z, type);
-			p += bytesPerElement;
-		}
-	}
-}
-
-
-
-static float
-randomHeight
-(
-int step
-)
-{
-	return (0.33 * s_gridSpacing * s_gridSize * step * (rand() - (0.5 * RAND_MAX))) / (1.0 * RAND_MAX * s_gridSize);
-}
-
-
-
-static void
-dumpGrid
-(
-const byte_t * grid,
-int bytesPerElement,
-PHY_ScalarType type,
-int max
-)
-{
-	//std::cerr << "Grid:\n";
-
-	char buffer[32];
-
-	for (int j = 0; j < max; ++j) {
-		for (int i = 0; i < max; ++i) {
-			long offset = j * s_gridSize + i;
-			float z = convertToFloat(grid + offset * bytesPerElement, type);
-			sprintf(buffer, "%6.2f", z);
-			//std::cerr << "  " << buffer;
-		}
-		//std::cerr << "\n";
-	}
-}
-
-
-
-static void
-updateHeight
-(
-byte_t * p,
-float new_val,
-PHY_ScalarType type
-)
-{
-	float old_val = convertToFloat(p, type);
-	if (!old_val) {
-		convertFromFloat(p, new_val, type);
-	}
-}
-
-
-
-// creates a random, fractal heightfield
-static void
-setFractal
-(
-byte_t * grid,
-int bytesPerElement,
-PHY_ScalarType type,
-int step
-)
-{
-	btAssert(grid);
-	btAssert(bytesPerElement > 0);
-	btAssert(step > 0);
-	btAssert(step < s_gridSize);
-
-	int newStep = step / 2;
-//	std::cerr << "Computing grid with step = " << step << ": before\n";
-//	dumpGrid(grid, bytesPerElement, type, step + 1);
-
-	// special case: starting (must set four corners)
-	if (s_gridSize - 1 == step) {
-		// pick a non-zero (possibly negative) base elevation for testing
-		float base = randomHeight(step / 2);
-
-		convertFromFloat(grid, base, type);
-		convertFromFloat(grid + step * bytesPerElement, base, type);
-		convertFromFloat(grid + step * s_gridSize * bytesPerElement, base, type);
-		convertFromFloat(grid + (step * s_gridSize + step) * bytesPerElement, base, type);
-	}
-
-	// determine elevation of each corner
-	float c00 = convertToFloat(grid, type);
-	float c01 = convertToFloat(grid + step * bytesPerElement, type);
-	float c10 = convertToFloat(grid + (step * s_gridSize) * bytesPerElement, type);
-	float c11 = convertToFloat(grid + (step * s_gridSize + step) * bytesPerElement, type);
-
-	// set top middle
-	updateHeight(grid + newStep * bytesPerElement, 0.5 * (c00 + c01) + randomHeight(step), type);
-
-	// set left middle
-	updateHeight(grid + (newStep * s_gridSize) * bytesPerElement, 0.5 * (c00 + c10) + randomHeight(step), type);
-
-	// set right middle
-	updateHeight(grid + (newStep * s_gridSize + step) * bytesPerElement, 0.5 * (c01 + c11) + randomHeight(step), type);
-
-	// set bottom middle
-	updateHeight(grid + (step * s_gridSize + newStep) * bytesPerElement, 0.5 * (c10 + c11) + randomHeight(step), type);
-
-	// set middle
-	updateHeight(grid + (newStep * s_gridSize + newStep) * bytesPerElement, 0.25 * (c00 + c01 + c10 + c11) + randomHeight(step), type);
-
-//	std::cerr << "Computing grid with step = " << step << ": after\n";
-//	dumpGrid(grid, bytesPerElement, type, step + 1);
-
-	// terminate?
-	if (newStep < 2) {
-		return;
-	}
-
-	// recurse
-	setFractal(grid, bytesPerElement, type, newStep);
-	setFractal(grid + newStep * bytesPerElement, bytesPerElement, type, newStep);
-	setFractal(grid + (newStep * s_gridSize) * bytesPerElement, bytesPerElement, type, newStep);
-	setFractal(grid + ((newStep * s_gridSize) + newStep) * bytesPerElement, bytesPerElement, type, newStep);
-}
-
-byte_t*
-getRawHeightfieldData(eTerrainModel model, PHY_ScalarType type, btScalar& minHeight, btScalar& maxHeight)
-{
-//	std::cerr << "\nRegenerating terrain\n";
-//	std::cerr << "  model = " << model << "\n";
-//	std::cerr << "  type = " << type << "\n";
-
-	long nElements = ((long) s_gridSize) * s_gridSize;
-//	std::cerr << "  nElements = " << nElements << "\n";
-
-	int bytesPerElement = getByteSize(type);
-//	std::cerr << "  bytesPerElement = " << bytesPerElement << "\n";
-	btAssert(bytesPerElement > 0 && "bad bytes per element");
-
-	long nBytes = nElements * bytesPerElement;
-//	std::cerr << "  nBytes = " << nBytes << "\n";
-	byte_t * raw = new byte_t[nBytes];
-	btAssert(raw && "out of memory");
-
-	// populate based on model
-	switch (model) {
-	//case eRadial:
-	//	setRadial(raw, bytesPerElement, type);
-	//	break;
-
-	case eFractal:
-		for (int i = 0; i < nBytes; i++)
-		{
-			raw[i] = 0;
-		}
-		setFractal(raw, bytesPerElement, type, s_gridSize - 1);
-		break;
-
-	default:
-		btAssert(!"bad model type");
-	}
-
-
-	// find min/max
-	for (int i = 0; i < s_gridSize; ++i) {
-		for (int j = 0; j < s_gridSize; ++j) {
-			float z = getGridHeight(raw, i, j, type);
-//			std::cerr << "i=" << i << ", j=" << j << ": z=" << z << "\n";
-
-			// update min/max
-			if (!i && !j) {
-				minHeight = z;
-				maxHeight = z;
-			} else {
-				if (z < minHeight) {
-					minHeight = z;
-				}
-				if (z > maxHeight) {
-					maxHeight = z;
-				}
-			}
-		}
-	}
-
-	if (maxHeight < -minHeight) {
-		maxHeight = -minHeight;
-	}
-	if (minHeight > -maxHeight) {
-		minHeight = -maxHeight;
-	}
-
-//	std::cerr << "  minHeight = " << minHeight << "\n";
-//	std::cerr << "  maxHeight = " << maxHeight << "\n";
-
-	return raw;
+    Ogre::Image img;
+    try
+    {
+        img.load(filename, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    }   
+    catch(Ogre::Exception err)
+    {
+        LOG(err.what());
+        return false;
+    }
+    
+    size_t grid_w = 65, grid_h = 65; // must be (2^N) + 1
+    size_t grid_max_w = 129, grid_max_h = 129; // must be (2^N) + 1
+    size_t img_w = img.getWidth();
+    size_t img_h = img.getHeight();
+    
+    // validate image size(2^N) + 1
+    if ((img_w-1) & (img_w-2)) img_w = grid_w; 
+    if ((img_h-1) & (img_h-2)) img_h = grid_h;
+    //if (img_w > grid_max_w) img_w = grid_max_w; 
+    //if (img_h > grid_max_h) img_h = grid_max_h; 
+
+    LOG("LoadImage name=%s, width=%d, height=%d, width^2+1=%d, height^2+1=%d",
+        filename.c_str(), img.getWidth(), img.getHeight(), img_w, img_h);
+    img.resize(img_w, img_h, Ogre::Image::FILTER_TRIANGLE);
+
+    size_t bufSize = img.getSize();    
+    data = new Ogre::Real[ bufSize ];
+    Ogre::Real* dest = static_cast<Ogre::Real*>(data);
+    memset(dest, 0, bufSize);
+    
+    
+    const Ogre::uchar* src = img.getData();
+    // notice uchar to float aligement
+    for (size_t i=0;i<bufSize;++i)
+    {        
+        dest[i] = ((Ogre::Real)src[i]-127.0f)/16.0f;
+    }
+          
+    // parameter    
+    int upAxis = 1;
+    btScalar gridSpacing = 5.0f;
+    btScalar gridHeightScale = 0.2f;
+    btScalar minHeight = -10.0f;
+    btScalar maxHeight = 10.0f;
+    btScalar defaultContactProcessingThreshold = BT_LARGE_FLOAT;
+
+	btHeightfieldTerrainShape *heightfieldShape =  
+        new btHeightfieldTerrainShape(img_w, img_h,
+                                      dest,
+                                      gridHeightScale,
+                                      minHeight, maxHeight,
+                                      upAxis, PHY_FLOAT, false);
+	btAssert(heightfieldShape && "null heightfield");
+
+	// shape
+	btVector3 localScaling(25.0f, 15.0f, 25.0f);
+	heightfieldShape->setLocalScaling(localScaling);    
+    collisionShapes.push_back(heightfieldShape);
+
+    // rigidBody
+    btDefaultMotionState* motionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0)));
+    btRigidBody::btRigidBodyConstructionInfo cInfo(0, motionState, heightfieldShape, btVector3(0,0,0));
+    btRigidBody* rigidBody = new btRigidBody(cInfo);        	
+	rigidBody->setContactProcessingThreshold(defaultContactProcessingThreshold);
+    int flags = rigidBody->getCollisionFlags();
+    rigidBody->setCollisionFlags(flags | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
+    
+    dynamicsWorld->addRigidBody(rigidBody);
+    
+    // add ogre height field mesh
+    Ogre::SceneManager* sceneMgr = Ogre::Root::getSingletonPtr()->getSceneManager("DefaultSceneManager");
+    btAssert(sceneMgr);
+    
+    Ogre::ManualObject* obj = sceneMgr->createManualObject("btHeightFieldEntity");
+
+    btVector3 aabbMin, aabbMax;
+    heightfieldShape->getAabb(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0)), aabbMin, aabbMax);
+
+    btHeightFieldProcessor callback(obj, "DefaultPlane");
+    heightfieldShape->processAllTriangles(&callback, aabbMin, aabbMax);
+   
+    sceneMgr->getRootSceneNode()->attachObject(obj);
+
+    return true;
 }

@@ -116,6 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\OgreMain\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Components\Overlay\include&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\include&quot;;&quot;$(SolutionDir)..\bullet-2.81-rev2613\src&quot;;&quot;$(SolutionDir)\source\Win32&quot;;&quot;$(SolutionDir)\source\Sample&quot;;&quot;$(SolutionDir)\source\Widget&quot;;&quot;$(SolutionDir)\source\Module&quot;;&quot;$(SolutionDir)\source&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -135,6 +136,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\ogre_src_v1-8-1\Dependencies\lib\Release&quot;;&quot;$(SolutionDir)..\ogre_src_v1-8-1\Build\lib\Release&quot;;&quot;$(SolutionDir)..\bullet-2.81-rev2613\lib&quot;;&quot;$(SolutionDir)..\bullet-2.81-rev2613\Glut&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"

@@ -24,15 +24,21 @@ ConvertOgreVectorTobtVector(const Ogre::Vector3& v);
 bool
 makeRayCastingSegment(float mouse_x, float mouse_y, Ogre::Camera* cam, btVector3& rayFrom, btVector3& rayTo);
 
-bool
-buildRigidBodyFromOgreEntity(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld, 
-                             btAlignedObjectArray<btCollisionShape*>& collisionShapes,
-                             btAlignedObjectArray<btTriangleIndexVertexArray*>& triangleMeshes);
-
 /*
- |
+ | utiltiy for build triangle shape from ogre mesh 
  */
 bool
-buildHeightFieldTerrainFromImage(Ogre::Entity* ent, btDynamicsWorld* dynamicsWorld, 
-                             btAlignedObjectArray<btCollisionShape*>& collisionShapes);
+buildRigidBodyFromOgreEntity(Ogre::Entity* ent,
+                             btDynamicsWorld* dynamicsWorld, 
+                             btAlignedObjectArray<btCollisionShape*>& collisionShapes,
+                             void* &data);
+
+/*
+ | utiltiy for build bullet height field terrain from gray scale image
+ */
+bool
+buildHeightFieldTerrainFromImage(const Ogre::String& filename, 
+                                 btDynamicsWorld* dynamicsWorld, 
+                                 btAlignedObjectArray<btCollisionShape*>& collisionShapes,
+                                 void* &data);
                              

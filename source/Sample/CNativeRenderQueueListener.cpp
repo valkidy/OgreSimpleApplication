@@ -186,7 +186,7 @@ CDebugDrawer::CDebugDrawer(const Ogre::Camera* camera, Ogre::SceneManager* scene
 	    sceneMgr->addRenderQueueListener(mRenderQueueListener);	
 
         // Set debugDrawer
-        mDebugDraw->setDebugMode(btIDebugDraw::DBG_EnableCCD | btIDebugDraw::DBG_DrawWireframe);
+        mDebugDraw->setDebugMode(btIDebugDraw::DBG_EnableCCD | btIDebugDraw::DBG_DrawWireframe);        
         dynamicsWorld->setDebugDrawer(static_cast<btIDebugDraw*>(mDebugDraw));
     } // End if
 }

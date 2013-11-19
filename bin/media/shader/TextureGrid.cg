@@ -1,0 +1,46 @@
+//-----------------------------------------------------------------------------
+//                         PROGRAM DEPENDENCIES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//                         GLOBAL Defination
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Function Name: main_vp
+// Function Desc: Vertex Program Entry point
+//-----------------------------------------------------------------------------
+void main_vp(
+	// Vertex Inputs
+	in float4 iPosition		: POSITION,
+	in float2 iUV			: TEXCOORD0,	
+	// Vertex Outputs
+	out float4 oPosition 	: POSITION,
+	out float4 oUV			: TEXCOORD0,
+	// User parameter
+	uniform float4x4	worldviewproj_matrix,
+	uniform float4x4	texture_matrix0,
+	uniform float4x4 	worldview_matrix,
+	uniform float 		far_clip_distance)
+{
+	oPosition = mul(worldviewproj_matrix, iPosition);
+	//oUV = mul(texture_matrix0, float4(iUV, 0, 1)).xy;
+	float4 viewPosition = mul(worldview_matrix, iPosition);
+	float dist = length(viewPosition.xyz);
+	float f = 250.0;
+	float alpha = clamp((f - dist) / f, 0.0, 1.0);
+	oUV = float4(0.05 * iPosition.xz, dist, alpha);
+	
+}
+//-----------------------------------------------------------------------------
+// Function Name: main_fp
+// Function Desc: Pixel Program Entry point
+//-----------------------------------------------------------------------------
+void main_fp(
+	// Pixel Inputs
+	in float4 iUV		: TEXCOORD0,	
+	// Pixel Outputs
+    out float4 oColor	: COLOR,
+	// User parameter
+	uniform sampler2D DiffuseMap : register(s0))
+{						
+	oColor = float4(tex2D(DiffuseMap, iUV.xy).xyz , iUV.w);
+}

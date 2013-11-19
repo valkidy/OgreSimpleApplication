@@ -9,7 +9,9 @@ void
 D3d9NativeRender::initRender()
 {
     Ogre::RenderWindow* window = static_cast<Ogre::RenderWindow*>(Ogre::Root::getSingletonPtr()->getRenderTarget("Ogre Render Window"));
-	window->getCustomAttribute( "D3DDEVICE", &m_pD3dDevice );    
+	window->getCustomAttribute( "D3DDEVICE", &m_pD3dDevice );
+
+    m_pVB = NULL;
 }
 
 void 
@@ -27,26 +29,26 @@ D3d9NativeRender::postRender()
 {
     D3D9VERTEXBUFFER2& VertexBuffer2 = m_pD3dDebugDrawer->getVertexBuffer2();
     UINT primitiveCount  = VertexBuffer2.index / 2;    
-    UINT bufferSize = VertexBuffer2.index * sizeof(D3D9VERTEX2);
-
-	// Create the vertex buffer.
+    static UINT bufferSize = VertexBuffer2.index * sizeof(D3D9VERTEX2);
+        
+    // Create the vertex buffer.
     if( FAILED( m_pD3dDevice->CreateVertexBuffer( bufferSize, 
         0, D3DFVF_VERTEX2, D3DPOOL_DEFAULT, &m_pVB, NULL ) ) )
-	{
-		return;//E_FAIL;
-	}
-
-	// Fill the vertex buffer.
-	VOID* pVertices;
-	if( FAILED( m_pVB->Lock( 0, bufferSize, (void**)&pVertices, 0 ) ) )
-		return;// E_FAIL;
+    {
+	    return;//E_FAIL;
+    }
+    
+    // Fill the vertex buffer.
+    VOID* pVertices;
+    if( FAILED( m_pVB->Lock( 0, bufferSize, (void**)&pVertices, 0 ) ) )
+	    return;// E_FAIL;
     memcpy( pVertices, VertexBuffer2.vertexBuffer, bufferSize );
-	m_pVB->Unlock();
+    m_pVB->Unlock();
 
-	// Render the vertex buffer contents
-	m_pD3dDevice->SetStreamSource( 0, m_pVB, 0, sizeof(D3D9VERTEX2) );
-	m_pD3dDevice->SetFVF( D3DFVF_VERTEX2 );
-	m_pD3dDevice->DrawPrimitive( D3DPT_LINELIST, 0, primitiveCount );
-
-	m_pVB->Release();
+    // Render the vertex buffer contents
+    m_pD3dDevice->SetStreamSource( 0, m_pVB, 0, sizeof(D3D9VERTEX2) );
+    m_pD3dDevice->SetFVF( D3DFVF_VERTEX2 );
+    m_pD3dDevice->DrawPrimitive( D3DPT_LINELIST, 0, primitiveCount );
+    
+    m_pVB->Release();    
 }

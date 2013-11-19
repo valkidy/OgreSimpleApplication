@@ -112,7 +112,7 @@ CBulletPhysicManager::init()
     // init picker
     m_picker.m_pickConstraint = 0;
     m_picker.m_pickedBody = 0;
-
+    
     // create entity
     Ogre::Entity* _pEntity = m_sceneMgr->createEntity("OgreHead", "fish.mesh");
     assert(_pEntity);
@@ -124,11 +124,15 @@ CBulletPhysicManager::init()
     _pNode->setVisible(true);
 
     // build some regidBody
-    buildHeightFieldTerrainFromImage(NULL, m_dynamicsWorld, m_collisionShapes);
+    btScalar* data;
+    buildHeightFieldTerrainFromImage("terrain.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
     //btBuildShapeUtility::buildGroundShape(m_dynamicsWorld, m_collisionShapes);
     //btBuildShapeUtility::buildBoxShape(m_dynamicsWorld, m_collisionShapes);
-    //buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, m_triangleMeshes);
-        
+
+    btTriangleIndexVertexArray* triMesh;
+    buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, (void* &)triMesh);
+    m_triangleMeshes.push_back(triMesh);
+
     btTransform startTransform;
 	startTransform.setIdentity();
 	startTransform.setOrigin (btVector3(0.0, 4.0, 0.0));
@@ -200,11 +204,11 @@ CBulletPhysicManager::release()
 
 void
 CBulletPhysicManager::simulate(double dt)
-{    
+{
     if (m_dynamicsWorld)
     {   
         // LOG("dt : 1/60 = %.3f, %.3f", dt, 1/60.0f);        
-	    m_dynamicsWorld->stepSimulation(dt);
+	    m_dynamicsWorld->stepSimulation(dt, 4);
         //m_dynamicsWorld->stepSimulation(1/60.0f, 4);
         
 

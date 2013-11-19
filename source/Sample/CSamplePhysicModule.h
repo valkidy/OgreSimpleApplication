@@ -42,7 +42,8 @@ public:
         m_collisionConfiguration(NULL),
         m_dynamicsWorld(NULL),
         m_sceneMgr(NULL),
-        m_camera(NULL) { init();}
+        m_camera(NULL),
+        m_character(NULL) { init();}
     ~CBulletPhysicManager()  {release();}
 
     void simulate(double dt);
