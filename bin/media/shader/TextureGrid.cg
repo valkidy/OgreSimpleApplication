@@ -17,17 +17,17 @@ void main_vp(
 	out float4 oUV			: TEXCOORD0,
 	// User parameter
 	uniform float4x4	worldviewproj_matrix,
-	uniform float4x4	texture_matrix0,
 	uniform float4x4 	worldview_matrix,
 	uniform float 		far_clip_distance)
 {
 	oPosition = mul(worldviewproj_matrix, iPosition);
-	//oUV = mul(texture_matrix0, float4(iUV, 0, 1)).xy;
+	
 	float4 viewPosition = mul(worldview_matrix, iPosition);
 	float dist = length(viewPosition.xyz);
 	float f = 250.0;
 	float alpha = clamp((f - dist) / f, 0.0, 1.0);
-	oUV = float4(0.05 * iPosition.xz, dist, alpha);
+	float height = iPosition.y;
+	oUV = float4(0.05 * iPosition.xz, height, alpha);
 	
 }
 //-----------------------------------------------------------------------------
@@ -42,5 +42,9 @@ void main_fp(
 	// User parameter
 	uniform sampler2D DiffuseMap : register(s0))
 {						
-	oColor = float4(tex2D(DiffuseMap, iUV.xy).xyz , iUV.w);
+	float factor = 32.0 / 255.0;
+	float light = (iUV.z + 8.0) * factor;
+	// oColor = float4(light, light, light, 1.0);
+	
+	oColor = float4(light* tex2D(DiffuseMap, iUV.xy).xyz , iUV.w);
 }

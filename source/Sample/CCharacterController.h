@@ -25,6 +25,7 @@ public:
     virtual ~CCharacterController();
 
     void setLinearVelocity(const btVector3& velocity);
+    void jump();
 
 protected:
     btGhostPairCallback* m_ghostPairCallback;

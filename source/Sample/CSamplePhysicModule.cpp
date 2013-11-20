@@ -15,78 +15,6 @@
 
 #include "Win32Utility.h"
 
-///create 125 (5x5x5) dynamic object
-#define ARRAY_SIZE_X 5
-#define ARRAY_SIZE_Y 5
-#define ARRAY_SIZE_Z 5
-
-//maximum number of objects (and allow user to shoot additional boxes)
-#define MAX_PROXIES (ARRAY_SIZE_X*ARRAY_SIZE_Y*ARRAY_SIZE_Z + 1024)
-
-///scaling of the objects (0.1 = 20 centimeter boxes )
-#define SCALING 1.
-#define START_POS_X -5
-#define START_POS_Y  5
-#define START_POS_Z -3
-
-class btBuildShapeUtility
-{
-public:
-    static void buildGroundShape(btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes)
-    {
-        btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),1);
-        btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0)));
-        btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0,groundMotionState,groundShape,btVector3(0,0,0));
-        btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
-        groundRigidBody->setRestitution(0.0f);
-        groundRigidBody->setFriction(1.0f);
-
-        dynamicsWorld->addRigidBody(groundRigidBody);
-
-        collisionShapes.push_back(groundShape);
-    }
-
-    static void buildBoxShape(btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes)
-    {        
-	    /// Create Dynamic Objects
-	    btTransform startTransform;
-	    startTransform.setIdentity();
-
-	    btScalar mass(1.f);	
-        btVector3 localInertia(0,0,0);	
-		
-	    float start_x = START_POS_X - ARRAY_SIZE_X/2;
-	    float start_y = START_POS_Y;
-	    float start_z = START_POS_Z - ARRAY_SIZE_Z/2;
-
-	    for (int k=0;k<ARRAY_SIZE_Y;k++)
-	    {
-		    for (int i=0;i<ARRAY_SIZE_X;i++)
-		    {
-			    for(int j = 0;j<ARRAY_SIZE_Z;j++)
-			    {
-				    startTransform.setOrigin(SCALING*btVector3(
-									    btScalar(2.0*i + start_x),
-									    btScalar(20+2.0*k + start_y),
-									    btScalar(2.0*j + start_z)));
-
-    		        btBoxShape* colShape = new btBoxShape(btVector3(SCALING*1,SCALING*1,SCALING*1));
-                    collisionShapes.push_back(colShape);
-                    colShape->calculateLocalInertia(mass,localInertia);
-
-				    //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-				    btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-				    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
-				    btRigidBody* body = new btRigidBody(rbInfo);
-    				
-				    dynamicsWorld->addRigidBody(body);
-			    }
-		    }		
-        }
-    }
-};
-
-
 void
 CBulletPhysicManager::init()
 {
@@ -124,21 +52,22 @@ CBulletPhysicManager::init()
     _pNode->setVisible(true);
 
     // build some regidBody
-    btScalar* data;
-    buildHeightFieldTerrainFromImage("terrain.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
-    //btBuildShapeUtility::buildGroundShape(m_dynamicsWorld, m_collisionShapes);
-    //btBuildShapeUtility::buildBoxShape(m_dynamicsWorld, m_collisionShapes);
+    //btScalar* data;
+    //btUtility::buildHeightFieldTerrainFromImage("terrain65x65.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
 
-    btTriangleIndexVertexArray* triMesh;
-    buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, (void* &)triMesh);
-    m_triangleMeshes.push_back(triMesh);
+    btUtility::buildBoxShapeArray(NULL, m_dynamicsWorld, m_collisionShapes);
+    btUtility::buildGroundShape(m_sceneMgr, m_dynamicsWorld, m_collisionShapes);
+    
+    //btTriangleIndexVertexArray* triMesh;
+    //btUtility::buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, (void* &)triMesh);
+    //m_triangleMeshes.push_back(triMesh);
 
     btTransform startTransform;
 	startTransform.setIdentity();
 	startTransform.setOrigin (btVector3(0.0, 4.0, 0.0));
 	
     // add character
-    //m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
+    m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
 }
 
 void
@@ -208,10 +137,8 @@ CBulletPhysicManager::simulate(double dt)
     if (m_dynamicsWorld)
     {   
         // LOG("dt : 1/60 = %.3f, %.3f", dt, 1/60.0f);        
-	    m_dynamicsWorld->stepSimulation(dt, 4);
-        //m_dynamicsWorld->stepSimulation(1/60.0f, 4);
-        
-
+	    m_dynamicsWorld->stepSimulation(dt);
+                
         int numCollisionObjects = m_dynamicsWorld->getNumCollisionObjects();
         for (int i=0;i<numCollisionObjects;++i)
         {
@@ -236,7 +163,7 @@ CBulletPhysicManager::rayCasting(float x, float y)
 {       
     // for perspective viewport
     btVector3 rayFrom, rayTo;
-    makeRayCastingSegment(x, y, m_camera, rayFrom, rayTo);
+    btUtility::makeRayCastingSegment(x, y, m_camera, rayFrom, rayTo);
 
     btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom,rayTo); 
     if (m_dynamicsWorld)
@@ -311,7 +238,7 @@ CBulletPhysicManager::dragPickingConstraint(float x, float y)
 			{
 	            // for perspective viewport
                 btVector3 rayFrom, rayTo;
-                makeRayCastingSegment(x, y, m_camera, rayFrom, rayTo);
+                btUtility::makeRayCastingSegment(x, y, m_camera, rayFrom, rayTo);
 
 				btVector3 oldPivotInB = pickDof6->getFrameOffsetA().getOrigin();
 

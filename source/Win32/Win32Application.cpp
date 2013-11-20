@@ -38,7 +38,11 @@ COgreApplication::init()
         return false;
 
     //root
+#ifdef _DEBUG
     m_pRoot = new Ogre::Root("plugins_d.cfg");
+#else
+    m_pRoot = new Ogre::Root("plugins.cfg");
+#endif
 
     const Ogre::RenderSystemList& RenderSysList = m_pRoot->getAvailableRenderers();
     for (Ogre::RenderSystemList::const_iterator it=RenderSysList.begin() ; it!=RenderSysList.end() ; ++it)

@@ -14,8 +14,8 @@ CCharacterController::CCharacterController(btDynamicsWorld* dynamicsWorld, const
 	m_ghostObject = new btPairCachingGhostObject();
 	m_ghostObject->setWorldTransform(transform);
     
-	btScalar characterHeight = 1.75;
-	btScalar characterWidth  = 1.75;
+	btScalar characterHeight = 4;
+	btScalar characterWidth  = 2;
 	btConvexShape* capsule = new btCapsuleShape(characterWidth,characterHeight);
 	m_ghostObject->setCollisionShape(capsule);
 	m_ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
@@ -70,4 +70,11 @@ CCharacterController::setLinearVelocity(const btVector3& velocity)
 {
     btScalar walkSpeed = 0.05f;    
     m_character->setWalkDirection(velocity*walkSpeed);
+}
+
+void
+CCharacterController::jump()
+{
+    m_character->setJumpSpeed(30.0f);
+    m_character->jump();
 }

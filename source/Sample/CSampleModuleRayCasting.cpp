@@ -93,11 +93,19 @@ CSampleModuleRayCasting::keyReleased(const OIS::KeyCode& iKeyCode)
     case OIS::KC_RIGHT:
         dir.setX(1.0f);
         break;
+    case OIS::KC_SPACE:
+        {
+            if (m_pBulletPhysicManager)
+            {
+                m_pBulletPhysicManager->getCharacter()->jump();                
+            }
+        }
+        break;
     }
 
     if (m_pBulletPhysicManager)
     {
-        // m_pBulletPhysicManager->getCharacter()->setLinearVelocity(dir);
+        m_pBulletPhysicManager->getCharacter()->setLinearVelocity(dir);
     }
         
     return true;

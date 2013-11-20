@@ -7,8 +7,7 @@ vertex_program TextureGrid_VP_HLSL hlsl
 	{	
 		param_named_auto	worldviewproj_matrix				worldviewproj_matrix
 		param_named_auto 	worldview_matrix 					worldview_matrix
-		param_named_auto	far_clip_distance					far_clip_distance
-		param_named_auto	texture_matrix0    					texture_matrix 0
+		param_named_auto	far_clip_distance					far_clip_distance		
 	}
 }
 
@@ -18,8 +17,7 @@ vertex_program TextureGrid_VP_GLSL glsl
 	preprocessor_defines USE_GL=1
 	default_params
 	{
-		param_named_auto	worldviewproj_matrix				worldviewproj_matrix
-		param_named_auto	texture_matrix0    					texture_matrix 0
+		param_named_auto	worldviewproj_matrix				worldviewproj_matrix		
 	}
 }
 

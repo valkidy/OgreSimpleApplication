@@ -12,6 +12,9 @@
 // bullet
 #include "btBulletDynamicsCommon.h"
 
+namespace btUtility
+{
+
 /*
  | utiltiy for convert Ogre::Vector3 to btVector3
 */
@@ -42,3 +45,17 @@ buildHeightFieldTerrainFromImage(const Ogre::String& filename,
                                  btAlignedObjectArray<btCollisionShape*>& collisionShapes,
                                  void* &data);
                              
+/*
+ | utiltiy for build bullet ground shape and ogre plane
+ */
+bool 
+buildGroundShape(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes);
+
+/*
+ | utiltiy for build bullet box shape array
+ */
+bool
+buildBoxShapeArray(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes,
+                   const btVector3& array_size = btVector3(5,5,5), btScalar scale=1.0f);
+
+}; // namespace

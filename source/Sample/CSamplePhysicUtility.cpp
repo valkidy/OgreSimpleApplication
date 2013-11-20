@@ -5,6 +5,10 @@
 
 #include "CSamplePhysicUtility.h"
 
+namespace btUtility
+{
+
+
 btVector3
 ConvertOgreVectorTobtVector(const Ogre::Vector3& v) { return btVector3(v.x, v.y, v.z);}
 
@@ -278,6 +282,7 @@ protected:
  | 
  | @param in : 
  | @param out: raw data of height field terrain
+ | ToDo: adjest grid scale, grid height, local scale, max/min height
    ----------------------------------------------------------------------- */
 bool
 buildHeightFieldTerrainFromImage(const Ogre::String& filename, 
@@ -301,7 +306,7 @@ buildHeightFieldTerrainFromImage(const Ogre::String& filename,
     size_t img_w = img.getWidth();
     size_t img_h = img.getHeight();
     
-    // validate image size(2^N) + 1
+    // validate image size is (2^N) + 1
     if ((img_w-1) & (img_w-2)) img_w = grid_w; 
     if ((img_h-1) & (img_h-2)) img_h = grid_h;
     //if (img_w > grid_max_w) img_w = grid_max_w; 
@@ -309,19 +314,23 @@ buildHeightFieldTerrainFromImage(const Ogre::String& filename,
 
     LOG("LoadImage name=%s, width=%d, height=%d, width^2+1=%d, height^2+1=%d",
         filename.c_str(), img.getWidth(), img.getHeight(), img_w, img_h);
-    img.resize(img_w, img_h, Ogre::Image::FILTER_TRIANGLE);
+    img.resize(img_w, img_h);
 
-    size_t bufSize = img.getSize();    
+    size_t pixelSize = Ogre::PixelUtil::getNumElemBytes(img.getFormat());    
+    size_t bufSize = img.getSize() / pixelSize;
     data = new Ogre::Real[ bufSize ];
     Ogre::Real* dest = static_cast<Ogre::Real*>(data);
     memset(dest, 0, bufSize);
-    
-    
-    const Ogre::uchar* src = img.getData();
-    // notice uchar to float aligement
+        
+    /*
+     | @ Notice the alignment problem
+     | - uchar to float alignment
+     | - pixel format in bytes as rawdata type, also affects alignment
+     */
+    Ogre::uchar* src = img.getData();    
     for (size_t i=0;i<bufSize;++i)
     {        
-        dest[i] = ((Ogre::Real)src[i]-127.0f)/16.0f;
+        dest[i] = ((Ogre::Real)src[i * pixelSize] - 127.0f)/16.0f;
     }
           
     // parameter    
@@ -341,7 +350,7 @@ buildHeightFieldTerrainFromImage(const Ogre::String& filename,
 	btAssert(heightfieldShape && "null heightfield");
 
 	// shape
-	btVector3 localScaling(25.0f, 15.0f, 25.0f);
+	btVector3 localScaling(1.0f, 1.0f, 1.0f);
 	heightfieldShape->setLocalScaling(localScaling);    
     collisionShapes.push_back(heightfieldShape);
 
@@ -371,3 +380,90 @@ buildHeightFieldTerrainFromImage(const Ogre::String& filename,
 
     return true;
 }
+
+bool
+buildGroundShape(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes)
+{
+    btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0), 1);
+    btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0)));
+    btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0,groundMotionState,groundShape,btVector3(0,0,0));
+    btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+    groundRigidBody->setCcdMotionThreshold(1.0f);
+    groundRigidBody->setRestitution(0.0f);
+    groundRigidBody->setFriction(1.0f);
+
+    dynamicsWorld->addRigidBody(groundRigidBody);
+
+    collisionShapes.push_back(groundShape);
+
+    // build plane if scene manager exist
+    if (sceneMgr)
+    {
+        Ogre::Plane* plane = new Ogre::MovablePlane("Plane");
+	    plane->d = 0;
+	    plane->normal = Ogre::Vector3::UNIT_Y;
+	
+	    Ogre::MeshManager::getSingleton().createPlane("PlaneMesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, *plane,
+		    256, 256, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
+
+        Ogre::Entity* ent = sceneMgr->createEntity("PlaneEntity", "PlaneMesh");
+        assert(ent);
+        ent->setMaterialName("DefaultPlane");
+	    
+        Ogre::SceneNode* node = sceneMgr->getRootSceneNode()->createChildSceneNode("PlaneNode");
+	    node->attachObject(ent);
+	    node->setPosition(Ogre::Vector3::ZERO);
+    } // End if
+
+    return true;
+}
+
+/* ----------------------------------------------------------------------- 
+ | build bullet box shape
+ | 
+ | : default create 125 (5x5x5) dynamic object
+   ----------------------------------------------------------------------- */
+bool
+buildBoxShapeArray(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes,
+                   const btVector3& array_size, btScalar scale)
+{
+    btTransform startTransform;
+    startTransform.setIdentity();
+
+    btScalar mass(1.f);	
+    btVector3 localInertia(0,0,0);	
+
+    btBoxShape* colShape = new btBoxShape(btVector3(scale, scale, scale));
+    btAssert(colShape);
+    colShape->calculateLocalInertia(mass,localInertia);
+    collisionShapes.push_back(colShape);
+
+    float start_x = - array_size.getX()/2;
+    float start_y = array_size.getY();
+    float start_z = - array_size.getZ()/2;
+
+    for (int k=0;k<array_size.getY();k++)
+    {
+	    for (int i=0;i<array_size.getX();i++)
+	    {
+            for(int j = 0;j<array_size.getZ();j++)
+		    {
+			    startTransform.setOrigin(scale * btVector3(
+								    btScalar(2.0*i + start_x),
+								    btScalar(20+2.0*k + start_y),
+								    btScalar(2.0*j + start_z)));
+                
+			    //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+			    btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
+			    btRigidBody* body = new btRigidBody(rbInfo);
+				
+			    dynamicsWorld->addRigidBody(body);
+		    }
+	    }		
+    }
+
+    return true;
+}
+
+}; // namespace
