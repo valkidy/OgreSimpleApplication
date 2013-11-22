@@ -1,9 +1,11 @@
 #include "CSampleModuleRayCasting.h"
 #include "CSamplePhysicModule.h"
 #include "CCharacterController.h"
+#include "COgreCharacterController.h"
 
 CSampleModuleRayCasting::CSampleModuleRayCasting() :
-    m_pBulletPhysicManager(NULL)
+    m_pBulletPhysicManager(NULL),
+    m_Char(NULL)
 {
 }
 
@@ -15,6 +17,9 @@ CSampleModuleRayCasting::createScene()
     LOG("CSampleModuleRayCasting::createScene");  
 
     m_pBulletPhysicManager = new CBulletPhysicManager();
+
+    m_Char = new COgreCharacterController(m_pCamera);
+    m_Char->createCharacterController(m_pBulletPhysicManager->getWorld());
 }
 
 void 
@@ -23,6 +28,12 @@ CSampleModuleRayCasting::destroyScene()
     CSimpleModuleTemplate::destroyScene();
 
     LOG("CSampleModuleRayCasting::destroyScene");
+
+    if (m_Char)
+    {
+        delete m_Char;
+        m_Char = NULL;
+    }
 
     if (m_pBulletPhysicManager)
     {
@@ -37,7 +48,10 @@ CSampleModuleRayCasting::updateScene(float fDeltaTime)
     if (m_pBulletPhysicManager)
         m_pBulletPhysicManager->simulate(fDeltaTime);
 
-    CSimpleModuleTemplate::updateScene(fDeltaTime);        
+    if (m_Char)
+        m_Char->addTime(fDeltaTime);
+
+    CSimpleModuleTemplate::updateScene(fDeltaTime);
 }
 
 bool 
@@ -78,9 +92,23 @@ CSampleModuleRayCasting::mouseMoved(const OIS::MouseEvent &evt)
 }
 
 bool 
+CSampleModuleRayCasting::keyPressed(const OIS::KeyCode& iKeyCode)
+{
+    CSimpleModuleTemplate::keyPressed(iKeyCode);
+
+    if (m_Char)
+        m_Char->injectKeyDown(iKeyCode);
+    
+    return true;
+}
+
+bool 
 CSampleModuleRayCasting::keyReleased(const OIS::KeyCode& iKeyCode)
 {
     CSimpleModuleTemplate::keyReleased(iKeyCode);
+
+    if (m_Char)
+        m_Char->injectKeyUp(iKeyCode);
 
     btVector3 dir;
     dir.setZero();
@@ -95,18 +123,18 @@ CSampleModuleRayCasting::keyReleased(const OIS::KeyCode& iKeyCode)
         break;
     case OIS::KC_SPACE:
         {
-            if (m_pBulletPhysicManager)
-            {
-                m_pBulletPhysicManager->getCharacter()->jump();                
-            }
+            //if (m_pBulletPhysicManager)
+            //{
+            //    m_pBulletPhysicManager->getCharacter()->jump();                
+            //}
         }
         break;
     }
 
-    if (m_pBulletPhysicManager)
-    {
-        m_pBulletPhysicManager->getCharacter()->setLinearVelocity(dir);
-    }
+    //if (m_pBulletPhysicManager)
+    //{
+    //    m_pBulletPhysicManager->getCharacter()->setLinearVelocity(dir);
+    //}
         
     return true;
 }

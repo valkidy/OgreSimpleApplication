@@ -24,13 +24,17 @@ public:
     CCharacterController(btDynamicsWorld* dynamicsWorld, const btTransform& transform);
     virtual ~CCharacterController();
 
-    void setLinearVelocity(const btVector3& velocity);
+    void setLinearVelocity(const btVector3& velocity, btScalar angle, btScalar timeInterval);    
     void jump();
+    void jumping(const btVector3& direction, btScalar timeInterval);    
+
+    const btTransform& getWorldTransform();
 
 protected:
     btGhostPairCallback* m_ghostPairCallback;
     btKinematicCharacterController* m_character;
     btPairCachingGhostObject* m_ghostObject;
 };
+
 
 #endif

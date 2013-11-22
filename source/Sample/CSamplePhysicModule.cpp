@@ -55,7 +55,7 @@ CBulletPhysicManager::init()
     //btScalar* data;
     //btUtility::buildHeightFieldTerrainFromImage("terrain65x65.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
 
-    btUtility::buildBoxShapeArray(NULL, m_dynamicsWorld, m_collisionShapes);
+    btUtility::buildBoxShapeArray(m_sceneMgr, m_dynamicsWorld, m_collisionShapes);
     btUtility::buildGroundShape(m_sceneMgr, m_dynamicsWorld, m_collisionShapes);
     
     //btTriangleIndexVertexArray* triMesh;
@@ -64,10 +64,10 @@ CBulletPhysicManager::init()
 
     btTransform startTransform;
 	startTransform.setIdentity();
-	startTransform.setOrigin (btVector3(0.0, 4.0, 0.0));
+	startTransform.setOrigin(btVector3(0.0, 4.0, 0.0));
 	
     // add character
-    m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
+    // m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
 }
 
 void

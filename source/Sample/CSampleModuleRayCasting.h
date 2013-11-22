@@ -2,6 +2,7 @@
 
 #include "COgreHeader.h"
 
+class COgreCharacterController;
 class CBulletPhysicManager;
 class CSampleModuleRayCasting :
     public CSimpleModuleTemplate
@@ -16,10 +17,13 @@ public:
     virtual void destroyScene();
 
 protected:
+    virtual bool keyPressed(const OIS::KeyCode& iKeyCode);
     virtual bool keyReleased(const OIS::KeyCode& iKeyCode);
     virtual bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
     virtual bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
     virtual bool mouseMoved(const OIS::MouseEvent &evt);
     
     CBulletPhysicManager* m_pBulletPhysicManager;
+
+    COgreCharacterController* m_Char;
 };

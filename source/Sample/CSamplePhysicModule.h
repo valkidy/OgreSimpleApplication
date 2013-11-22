@@ -83,5 +83,6 @@ private:
 
 public:
     CCharacterController* getCharacter(){ return m_character;}
-
+    btDynamicsWorld* getWorld(){return m_dynamicsWorld;}
+    
 }; // End of CBulletPhysicManager

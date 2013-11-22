@@ -433,30 +433,48 @@ buildBoxShapeArray(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld,
     btScalar mass(1.f);	
     btVector3 localInertia(0,0,0);	
 
-    btBoxShape* colShape = new btBoxShape(btVector3(scale, scale, scale));
-    btAssert(colShape);
-    colShape->calculateLocalInertia(mass,localInertia);
-    collisionShapes.push_back(colShape);
-
     float start_x = - array_size.getX()/2;
     float start_y = array_size.getY();
     float start_z = - array_size.getZ()/2;
 
+    int index = 0;
     for (int k=0;k<array_size.getY();k++)
     {
 	    for (int i=0;i<array_size.getX();i++)
 	    {
-            for(int j = 0;j<array_size.getZ();j++)
+            for(int j=0;j<array_size.getZ();j++)
 		    {
 			    startTransform.setOrigin(scale * btVector3(
 								    btScalar(2.0*i + start_x),
 								    btScalar(20+2.0*k + start_y),
 								    btScalar(2.0*j + start_z)));
-                
+
+                btBoxShape* colShape = new btBoxShape(btVector3(scale, scale, scale));
+                btAssert(colShape);
+                colShape->calculateLocalInertia(mass,localInertia);
+                collisionShapes.push_back(colShape);
+
 			    //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 			    btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
 			    btRigidBody* body = new btRigidBody(rbInfo);
+                
+                if (sceneMgr)
+                {
+                    Ogre::Entity* ent = sceneMgr->createEntity("ent_" + Ogre::StringConverter::toString(index++),"Barrel.mesh");
+
+                    Ogre::SceneNode* node = sceneMgr->getRootSceneNode()->createChildSceneNode("node_box_" + Ogre::StringConverter::toString(index++));
+                    node->attachObject(ent);
+                    node->setPosition(2.0*i + start_x, 20+2.0*k + start_y, 2.0*j + start_z);
+
+                    const Ogre::AxisAlignedBox& aabb = ent->getBoundingBox();
+                    const Ogre::Vector3& boxScale = (aabb.getMaximum() - aabb.getMinimum())/2.0f;
+                    node->scale(scale/boxScale.x, scale/boxScale.y, scale/boxScale.z);
+
+                    body->setUserPointer((void*)node);
+                }
+
+
 				
 			    dynamicsWorld->addRigidBody(body);
 		    }

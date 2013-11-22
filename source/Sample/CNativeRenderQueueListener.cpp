@@ -114,6 +114,8 @@ CNativeRenderSystemRenderQueueListener::releaseNativeRender()
 void 
 CNativeRenderSystemRenderQueueListener::renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation)
 {
+    return;
+
 	// Set wanted render queue here - make sure there are - make sure that something is on
 	// this queue - else you will never pass this if.
     if (queueGroupId != Ogre::RENDER_QUEUE_MAIN) 

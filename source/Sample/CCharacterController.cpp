@@ -28,7 +28,7 @@ CCharacterController::CCharacterController(btDynamicsWorld* dynamicsWorld, const
 	m_character = new btKinematicCharacterController(m_ghostObject,capsule,stepHeight);
 
     //only collide with static for now (no interaction with dynamic objects)
-	dynamicsWorld->addCollisionObject(m_ghostObject,btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter); 
+	dynamicsWorld->addCollisionObject(m_ghostObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter); 
 	dynamicsWorld->addAction(m_character);
 }
 
@@ -66,15 +66,29 @@ CCharacterController::~CCharacterController()
 }
 
 void 
-CCharacterController::setLinearVelocity(const btVector3& velocity)
-{
-    btScalar walkSpeed = 0.05f;    
-    m_character->setWalkDirection(velocity*walkSpeed);
+CCharacterController::setLinearVelocity(const btVector3& velocity, btScalar angle, btScalar timeInterval)
+{        
+    //m_character->setWalkDirection(velocity);
+    m_character->setVelocityForTimeInterval(velocity, timeInterval);
 }
 
 void
 CCharacterController::jump()
 {
-    m_character->setJumpSpeed(30.0f);
-    m_character->jump();
+    m_character->setJumpSpeed(10.0f);
+    m_character->setGravity(10.0f);
+    m_character->jump();    
+}
+
+void
+CCharacterController::jumping(const btVector3& direction, btScalar timeInterval)
+{
+    if (!m_character->onGround())
+         m_character->setVelocityForTimeInterval(direction, timeInterval);
+}
+
+const btTransform& 
+CCharacterController::getWorldTransform()
+{
+    return m_ghostObject->getWorldTransform();
 }

@@ -241,6 +241,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\source\Sample\COgreCharacterController.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\COgreCharacterController.h"
+				>
+			</File>
+			<File
 				RelativePath="..\source\Sample\CSampleModule.h"
 				>
 			</File>
