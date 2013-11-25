@@ -7,15 +7,16 @@
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 #include "BulletDynamics/Character/btKinematicCharacterController.h"
 
-CCharacterController::CCharacterController(btDynamicsWorld* dynamicsWorld, const btTransform& transform)
+CCharacterController::CCharacterController(btDynamicsWorld* dynamicsWorld, const btTransform& transform,
+                                           btScalar characterHeight, btScalar characterWidth)
 {   
     btAssert(dynamicsWorld);
 
 	m_ghostObject = new btPairCachingGhostObject();
 	m_ghostObject->setWorldTransform(transform);
     
-	btScalar characterHeight = 4;
-	btScalar characterWidth  = 2;
+	//btScalar characterHeight = 4;
+	//btScalar characterWidth  = 2;
 	btConvexShape* capsule = new btCapsuleShape(characterWidth,characterHeight);
 	m_ghostObject->setCollisionShape(capsule);
 	m_ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
@@ -46,6 +47,8 @@ CCharacterController::~CCharacterController()
             // remove callback and ghost object            
             dynamicsWorld->removeCollisionObject(m_ghostObject);
             dynamicsWorld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(NULL);
+
+            dynamicsWorld->removeAction(m_character);
         } 
             
         delete m_ghostObject;
@@ -74,9 +77,11 @@ CCharacterController::setLinearVelocity(const btVector3& velocity, btScalar angl
 
 void
 CCharacterController::jump()
-{
+{    
     m_character->setJumpSpeed(10.0f);
     m_character->setGravity(10.0f);
+    m_character->setFallSpeed(55.0f);
+
     m_character->jump();    
 }
 

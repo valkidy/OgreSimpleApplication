@@ -43,7 +43,7 @@ public:
     COgreCharacterController(Ogre::Camera* cam) : 
         mCamera(cam),
         m_character(NULL) { setupBody(cam->getSceneManager()); setupAnimations(); }
-    virtual ~COgreCharacterController() {}
+    virtual ~COgreCharacterController() { destroyCharacterController(); }
     
     void addTime(Ogre::Real deltaTime);
     void injectKeyDown(const OIS::KeyCode& iKeyCode);
@@ -53,6 +53,7 @@ public:
     void createCharacterController(btDynamicsWorld* dynamicsWorld);
 
 protected:
+    void destroyCharacterController();
     void setupBody(Ogre::SceneManager* sceneMgr);
     void setupAnimations();
     void updateBody(Ogre::Real deltaTime);

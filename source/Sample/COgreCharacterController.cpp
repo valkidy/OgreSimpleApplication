@@ -8,10 +8,11 @@
 
 void 
 COgreCharacterController::setupBody(Ogre::SceneManager* sceneMgr)
-{
+{	
 	// entity
 	mBodyEnt = sceneMgr->createEntity("SinbadBody", "Sinbad.mesh");
-	
+    mBodyEnt->setCastShadows(true);
+
     // node
     mBodyNode = sceneMgr->getRootSceneNode()->createChildSceneNode("SinbadBodyNode");
     mBodyNode->attachObject(mBodyEnt);
@@ -225,6 +226,10 @@ COgreCharacterController::injectKeyUp(const OIS::KeyCode& iKeyCode)
 void 
 COgreCharacterController::createCharacterController(btDynamicsWorld* dynamicsWorld)
 {
+    const Ogre::AxisAlignedBox& aabb = mBodyEnt->getBoundingBox();
+    const Ogre::Vector3& halfSize = aabb.getHalfSize();
+    Ogre::Real width = sqrt(halfSize.x*halfSize.x + halfSize.z+halfSize.z);
+
     const Ogre::Vector3& pos = mBodyNode->getPosition();
     const Ogre::Quaternion& rot = mBodyNode->getOrientation();
 
@@ -233,5 +238,15 @@ COgreCharacterController::createCharacterController(btDynamicsWorld* dynamicsWor
     startTransform.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
 
     if (!m_character)
-        m_character = new CCharacterController(dynamicsWorld, startTransform);
+        m_character = new CCharacterController(dynamicsWorld, startTransform, halfSize.y, width/2.0f);
+}
+
+void
+COgreCharacterController::destroyCharacterController()
+{ 
+    if (m_character) 
+    {
+        delete m_character; 
+        m_character = NULL;
+    }
 }

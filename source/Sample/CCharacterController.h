@@ -21,7 +21,8 @@ class btGhostPairCallback;
 class CCharacterController
 {
 public:
-    CCharacterController(btDynamicsWorld* dynamicsWorld, const btTransform& transform);
+    CCharacterController(btDynamicsWorld* dynamicsWorld, const btTransform& transform, 
+                         btScalar characterHeight, btScalar characterWidth);
     virtual ~CCharacterController();
 
     void setLinearVelocity(const btVector3& velocity, btScalar angle, btScalar timeInterval);    

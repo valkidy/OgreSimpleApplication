@@ -41,16 +41,6 @@ CBulletPhysicManager::init()
     m_picker.m_pickConstraint = 0;
     m_picker.m_pickedBody = 0;
     
-    // create entity
-    Ogre::Entity* _pEntity = m_sceneMgr->createEntity("OgreHead", "fish.mesh");
-    assert(_pEntity);
-    
-    Ogre::SceneNode* _pNode = m_sceneMgr->getRootSceneNode()->createChildSceneNode("OgreHeadNode");
-    assert(_pNode);
-    _pNode->attachObject(_pEntity);    
-    _pNode->setPosition(0, 0, 0);
-    _pNode->setVisible(true);
-
     // build some regidBody
     //btScalar* data;
     //btUtility::buildHeightFieldTerrainFromImage("terrain65x65.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
@@ -60,26 +50,12 @@ CBulletPhysicManager::init()
     
     //btTriangleIndexVertexArray* triMesh;
     //btUtility::buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, (void* &)triMesh);
-    //m_triangleMeshes.push_back(triMesh);
-
-    btTransform startTransform;
-	startTransform.setIdentity();
-	startTransform.setOrigin(btVector3(0.0, 4.0, 0.0));
-	
-    // add character
-    // m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
+    //m_triangleMeshes.push_back(triMesh);  
 }
 
 void
 CBulletPhysicManager::release()
 {
-    //delete character
-    if (m_character)
-    {
-        delete m_character;
-        m_character = NULL;
-    }
-
     //remove picker
     removePickingConstraint();
 
@@ -150,6 +126,10 @@ CBulletPhysicManager::simulate(double dt)
             Ogre::SceneNode* node = static_cast<Ogre::SceneNode*>(body->getUserPointer());
             if (node)
             {
+                /// Both ogre entity's root and bullet shape is at center
+                /// it might needs to substrate half-height
+                const btVector3& localScaling = body->getCollisionShape()->getLocalScaling();
+                
                 const btTransform& trans = body->getWorldTransform();
                 node->setPosition(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
                 node->setOrientation(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
@@ -263,4 +243,9 @@ CBulletPhysicManager::dragPickingConstraint(float x, float y)
 			}
 		}
     } // End if
+}
+
+void CBulletPhysicManager::enableDebug(bool enable)
+{
+    m_debugDrawer->setEnable(enable);
 }

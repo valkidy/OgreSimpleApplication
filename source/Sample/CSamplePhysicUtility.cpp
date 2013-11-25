@@ -25,7 +25,7 @@ makeRayCastingSegment(float mouse_x, float mouse_y, Ogre::Camera* cam, btVector3
 {
     float nearPlane = 1.0f; 
     // float nearPlane = cam->getNearClipDistance();
-    float farPlane = cam->getFarClipDistance();
+    float farPlane = std::max(cam->getFarClipDistance(), 100.0f);
     // float fovy = cam->getFOVy().valueDegrees();    
     float top = 1.f;
 	float bottom = -1.f;	
@@ -385,12 +385,18 @@ bool
 buildGroundShape(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes)
 {
     btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0), 1);
-    btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0)));
+    groundShape->setLocalScaling(btVector3(1,1,1));
+
+    btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0)));
     btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0,groundMotionState,groundShape,btVector3(0,0,0));
     btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
     groundRigidBody->setCcdMotionThreshold(1.0f);
     groundRigidBody->setRestitution(0.0f);
     groundRigidBody->setFriction(1.0f);
+
+    const btTransform& transform = groundRigidBody->getWorldTransform();
+    btVector3 trans = transform.getOrigin();
+    btQuaternion rot = transform.getRotation();
 
     dynamicsWorld->addRigidBody(groundRigidBody);
 
@@ -408,6 +414,7 @@ buildGroundShape(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, b
 
         Ogre::Entity* ent = sceneMgr->createEntity("PlaneEntity", "PlaneMesh");
         assert(ent);
+        ent->setCastShadows(false);
         ent->setMaterialName("DefaultPlane");
 	    
         Ogre::SceneNode* node = sceneMgr->getRootSceneNode()->createChildSceneNode("PlaneNode");
