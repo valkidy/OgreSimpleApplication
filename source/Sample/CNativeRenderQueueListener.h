@@ -8,19 +8,19 @@
 
 #include <Ogre.h>
 
-#include "GLDebugDrawer.h"
-#include "D3d9DebugDrawer.h"
 
+#include "LinearMath/btIDebugDraw.h"
 #include "BulletDynamics/Dynamics/btDynamicsWorld.h"
 
 /*
-    simple virtual native render 
+    simple virtual native render
+    - interface of render state 
+    - interface of bullet debug drawer
  */
-class INativeRender
+class INativeRender : public btIDebugDraw
 {
 public:
     virtual void initRender() = 0;
-
     virtual void preRender() = 0;
     virtual void postRender() = 0;
 
@@ -35,7 +35,7 @@ class CNativeRenderSystemRenderQueueListener : public Ogre::RenderQueueListener
 {
 public:
     CNativeRenderSystemRenderQueueListener(Ogre::MovableObject* object, const Ogre::Camera* camera, 
-        Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btIDebugDraw* debugDraw);	  
+        Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, INativeRender* nativeDebugRender);	  
       ~CNativeRenderSystemRenderQueueListener() {releaseNativeRender();}
 	virtual void renderQueueStarted(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation) {}
 	virtual void renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation);	
@@ -66,11 +66,11 @@ public:
     CDebugDrawer(const Ogre::Camera* camera, Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld);
     ~CDebugDrawer();
 	
-protected:
-    // virtual void doNativeRender();
-    
+    void setEnable(bool enable=true);
+
+protected:                
     Ogre::RenderQueueListener* mRenderQueueListener;
     Ogre::SceneManager* mSceneMgr;
         
-    btIDebugDraw* mDebugDraw;
+    INativeRender* mDebugDraw;
 };

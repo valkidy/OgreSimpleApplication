@@ -10,28 +10,59 @@
 // character controller
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
-
 #include "BulletDynamics/Character/btKinematicCharacterController.h"
 
+// soft rigid body
+#include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
+
 #include "Win32Utility.h"
+
+btSoftBodyWorldInfo m_softBodyWorldInfo;
 
 void
 CBulletPhysicManager::init()
 {
+#define SOFT_RIGID_DYNAMICSWORLD 1 
     // Build the broadphase
-    m_broadphase = new btDbvtBroadphase();
- 
-    // Set up the collision configuration and dispatcher
+    //m_broadphase = new btDbvtBroadphase();
+    btVector3 worldAabbMin(-1000,-1000,-1000);
+	btVector3 worldAabbMax(1000,1000,1000);
+
+	m_broadphase = new btAxisSweep3(worldAabbMin,worldAabbMax,32766);
+
+#ifdef  SOFT_RIGID_DYNAMICSWORLD 
+    m_softBodyWorldInfo.m_broadphase = m_broadphase;   
+#endif
+
+#ifdef  SOFT_RIGID_DYNAMICSWORLD     
+    m_collisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
+#else
+    // Set up the collision configuration and dispatcher    
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
+#endif
+
     m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
- 
+#ifdef  SOFT_RIGID_DYNAMICSWORLD
+    m_softBodyWorldInfo.m_dispatcher = m_dispatcher;
+#endif
+
     // The actual physics solver
     m_solver = new btSequentialImpulseConstraintSolver;
- 
+                   
+#ifdef  SOFT_RIGID_DYNAMICSWORLD 
+    btSoftBodySolver* softBodySolver = 0;
+    btDiscreteDynamicsWorld* world = new btSoftRigidDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration,softBodySolver);
+	m_dynamicsWorld = world;
+	//m_dynamicsWorld->setInternalTickCallback(pickingPreTickCallback,this,true);
+    m_dynamicsWorld->setGravity(btVector3(0,-10.0f,0));	    
+#else
     // The world.
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);        
     m_dynamicsWorld->setGravity(btVector3(0,-10.0f,0));
-
+#endif
+    
+    
     // init debug drawer
     m_sceneMgr = Ogre::Root::getSingletonPtr()->getSceneManager("DefaultSceneManager");
     m_camera = m_sceneMgr->getCamera("DefaultCamera");
@@ -41,44 +72,38 @@ CBulletPhysicManager::init()
     m_picker.m_pickConstraint = 0;
     m_picker.m_pickedBody = 0;
     
-    // create entity
-    Ogre::Entity* _pEntity = m_sceneMgr->createEntity("OgreHead", "fish.mesh");
-    assert(_pEntity);
-    
-    Ogre::SceneNode* _pNode = m_sceneMgr->getRootSceneNode()->createChildSceneNode("OgreHeadNode");
-    assert(_pNode);
-    _pNode->attachObject(_pEntity);    
-    _pNode->setPosition(0, 0, 0);
-    _pNode->setVisible(true);
-
     // build some regidBody
     //btScalar* data;
-    //btUtility::buildHeightFieldTerrainFromImage("terrain65x65.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
-
-    btUtility::buildBoxShapeArray(m_sceneMgr, m_dynamicsWorld, m_collisionShapes);
+    //btUtility::buildHeightFieldTerrainFromImage("terrain257x257.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
+    btUtility::buildBoxShapeArray(m_sceneMgr, m_dynamicsWorld, m_collisionShapes, btVector3(2,2,2));
     btUtility::buildGroundShape(m_sceneMgr, m_dynamicsWorld, m_collisionShapes);
     
     //btTriangleIndexVertexArray* triMesh;
     //btUtility::buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, (void* &)triMesh);
     //m_triangleMeshes.push_back(triMesh);
 
-    btTransform startTransform;
-	startTransform.setIdentity();
-	startTransform.setOrigin(btVector3(0.0, 4.0, 0.0));
-	
-    // add character
-    // m_character = new CCharacterController(m_dynamicsWorld, startTransform);    
+/////////////////////////////////////////////////////////////////////////////////////////    
+    m_dynamicsWorld->getDispatchInfo().m_enableSPU = true;
+	m_dynamicsWorld->setGravity(btVector3(0,-10,0));
+	m_softBodyWorldInfo.m_gravity.setValue(0,-10,0);
+	m_softBodyWorldInfo.m_sparsesdf.Initialize();
+    m_softBodyWorldInfo.air_density = 1.2f;
+    m_softBodyWorldInfo.water_density = 0;
+    m_softBodyWorldInfo.water_offset = 0;
+    m_softBodyWorldInfo.water_normal = btVector3(0, 0, 0);
+
+    btUtility::buildSticks(m_sceneMgr, m_dynamicsWorld, m_softBodyWorldInfo);
+
+/////////////////////////////////////////////////////////	
 }
 
 void
 CBulletPhysicManager::release()
 {
-    //delete character
-    if (m_character)
-    {
-        delete m_character;
-        m_character = NULL;
-    }
+#define SOFT_RIGID_DYNAMICSWORLD 1 
+#ifdef  SOFT_RIGID_DYNAMICSWORLD 
+    m_softBodyWorldInfo.m_sparsesdf.Reset();
+#endif
 
     //remove picker
     removePickingConstraint();
@@ -136,9 +161,15 @@ CBulletPhysicManager::simulate(double dt)
 {
     if (m_dynamicsWorld)
     {   
-        // LOG("dt : 1/60 = %.3f, %.3f", dt, 1/60.0f);        
-	    m_dynamicsWorld->stepSimulation(dt);
-                
+        // LOG("dt : 1/60 = %.3f, %.3f", dt, 1/60.0f);    
+        int numSimSteps;
+		numSimSteps = m_dynamicsWorld->stepSimulation(dt);
+
+#define SOFT_RIGID_DYNAMICSWORLD 1
+#ifdef  SOFT_RIGID_DYNAMICSWORLD                    
+        m_softBodyWorldInfo.m_sparsesdf.GarbageCollect();
+#endif
+        
         int numCollisionObjects = m_dynamicsWorld->getNumCollisionObjects();
         for (int i=0;i<numCollisionObjects;++i)
         {
@@ -150,6 +181,10 @@ CBulletPhysicManager::simulate(double dt)
             Ogre::SceneNode* node = static_cast<Ogre::SceneNode*>(body->getUserPointer());
             if (node)
             {
+                /// Both ogre entity's root and bullet shape is at center
+                /// it might needs to substrate half-height
+                const btVector3& localScaling = body->getCollisionShape()->getLocalScaling();
+                
                 const btTransform& trans = body->getWorldTransform();
                 node->setPosition(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
                 node->setOrientation(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
@@ -263,4 +298,9 @@ CBulletPhysicManager::dragPickingConstraint(float x, float y)
 			}
 		}
     } // End if
+}
+
+void CBulletPhysicManager::enableDebug(bool enable)
+{
+    m_debugDrawer->setEnable(enable);
 }

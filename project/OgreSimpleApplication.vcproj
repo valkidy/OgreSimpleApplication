@@ -296,14 +296,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\source\Sample\GLNativeRender.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\source\Sample\GLNativeRender.h"
-					>
-				</File>
-				<File
 					RelativePath="..\source\Sample\GlutStuff.h"
 					>
 				</File>
@@ -317,14 +309,6 @@
 				</File>
 				<File
 					RelativePath="..\source\Sample\D3d9DebugDrawer.h"
-					>
-				</File>
-				<File
-					RelativePath="..\source\Sample\D3d9NativeRender.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\source\Sample\D3d9NativeRender.h"
 					>
 				</File>
 				<File

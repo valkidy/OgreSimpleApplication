@@ -42,22 +42,6 @@ CSimpleModuleTemplate::createScene()
     m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.3f, 0.3f, 0.3f));
     //build skybox
     m_pSceneMgr->setSkyBox(true, "DefaultSkyBox");
-    //build plane
-    /*
-    Ogre::Plane* _pPlane = new Ogre::MovablePlane("Plane");
-	_pPlane->d = 0;
-	_pPlane->normal = Ogre::Vector3::UNIT_Y;
-	
-	Ogre::MeshManager::getSingleton().createPlane("PlaneMesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, *_pPlane,
-		256, 256, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
-
-    Ogre::Entity* _pPlaneEntity = m_pSceneMgr->createEntity("PlaneEntity", "PlaneMesh");
-    assert(_pPlaneEntity);
-    _pPlaneEntity->setMaterialName("DefaultPlane");
-	Ogre::SceneNode* _pPlaneNode = m_pSceneMgr->getRootSceneNode()->createChildSceneNode("PlaneNode");
-	_pPlaneNode->attachObject(_pPlaneEntity);
-	_pPlaneNode->setPosition(Ogre::Vector3::ZERO);
-    */
 	
     CPanelManager::getSingleton().CreateWidget<ParamsPanel>("StatPanel", &UpdateStats);
 }

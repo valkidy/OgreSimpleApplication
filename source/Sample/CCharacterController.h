@@ -21,13 +21,14 @@ class btGhostPairCallback;
 class CCharacterController
 {
 public:
-    CCharacterController(btDynamicsWorld* dynamicsWorld, const btTransform& transform);
+    CCharacterController(btDynamicsWorld* dynamicsWorld, const btTransform& transform, 
+                         btScalar characterHeight, btScalar characterWidth);
     virtual ~CCharacterController();
 
     void setLinearVelocity(const btVector3& velocity, btScalar angle, btScalar timeInterval);    
     void jump();
     void jumping(const btVector3& direction, btScalar timeInterval);    
-
+    bool onGround();
     const btTransform& getWorldTransform();
 
 protected:

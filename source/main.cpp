@@ -10,7 +10,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, int)
     
     CHECK_MEMORY();
 
-    //_CrtSetBreakAlloc(1909);
+    //_CrtSetBreakAlloc(30565);
 
     COgreApplication app;
 

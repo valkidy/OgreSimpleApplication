@@ -16,6 +16,31 @@ CSampleModuleRayCasting::createScene()
 
     LOG("CSampleModuleRayCasting::createScene");  
 
+    // set shadow properties
+    /*
+    m_pSceneMgr->setShadowColour(Ogre::ColourValue(0.5, 0.5, 0.5));
+	m_pSceneMgr->setShadowTextureSize(1024);
+	m_pSceneMgr->setShadowTextureCount(1);
+    m_pSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_MODULATIVE);
+    m_pSceneMgr->setShadowUseInfiniteFarPlane(false);
+    */
+
+    // use a small amount of ambient lighting
+	m_pSceneMgr->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
+
+    Ogre::Light* directionalLight = m_pSceneMgr->createLight("directionalLight");
+    directionalLight->setType(Ogre::Light::LT_DIRECTIONAL);
+    directionalLight->setDiffuseColour(Ogre::ColourValue(.25, .25, 0));
+    directionalLight->setSpecularColour(Ogre::ColourValue(.25, .25, 0));
+    directionalLight->setDirection(Ogre::Vector3( 0, -1, 1 )); 
+
+	// add a bright light above the scene
+    Ogre::Light* pointLight = m_pSceneMgr->createLight("pointLight");
+    pointLight->setType(Ogre::Light::LT_POINT);
+    pointLight->setPosition(Ogre::Vector3(0, 150, 250)); 
+    pointLight->setDiffuseColour(1.0, 1.0, 0.0);
+    pointLight->setSpecularColour(1.0, 1.0, 0.0);
+
     m_pBulletPhysicManager = new CBulletPhysicManager();
 
     m_Char = new COgreCharacterController(m_pCamera);
@@ -127,6 +152,18 @@ CSampleModuleRayCasting::keyReleased(const OIS::KeyCode& iKeyCode)
             //{
             //    m_pBulletPhysicManager->getCharacter()->jump();                
             //}
+        }
+        break;
+    case OIS::KC_B:
+        {
+            if (m_pBulletPhysicManager)
+            {
+                static bool enable = false;
+
+                m_pBulletPhysicManager->enableDebug(enable);
+
+                enable = !enable;
+            }
         }
         break;
     }

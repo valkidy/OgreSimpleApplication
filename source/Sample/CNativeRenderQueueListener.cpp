@@ -1,7 +1,6 @@
 #include "CNativeRenderQueueListener.h"
-
-#include "D3d9NativeRender.h"
-#include "GLNativeRender.h"
+#include "GLDebugDrawer.h"
+#include "D3d9DebugDrawer.h"
 
 #include <stdio.h>
 
@@ -16,37 +15,20 @@ using namespace Ogre;
  --------------------------------------------------------------------- */
 CNativeRenderSystemRenderQueueListener::CNativeRenderSystemRenderQueueListener(
     Ogre::MovableObject* object, const Ogre::Camera* camera, Ogre::SceneManager* sceneMgr, 
-    btDynamicsWorld* dynamicsWorld, btIDebugDraw* debugDraw) :
+    btDynamicsWorld* dynamicsWorld, INativeRender* nativeDebugRender) :
     mObject(object),
     mCamera(camera),
     mSceneMgr(sceneMgr),
     mDynamicsWorld(dynamicsWorld),
-    mNativeRender(NULL),
+    mNativeRender(nativeDebugRender),
     mPass(NULL) 
 {
     initNativeRender();
-
-    // binding d3d9 renderer
-    D3d9NativeRender* pNativeRender = (dynamic_cast<D3d9NativeRender*>(mNativeRender));
-    if (pNativeRender)
-    {
-        pNativeRender->bindDebugDrawer(static_cast<D3d9DebugDrawer*>(debugDraw));
-    } // End if    
 }
 
 void 
 CNativeRenderSystemRenderQueueListener::initNativeRender()
 {
-    const Ogre::String& renderSystemName = mSceneMgr->getDestinationRenderSystem()->getName();    
-    if (g_d3d9RenderSystem == renderSystemName) 
-    {
-        mNativeRender = new D3d9NativeRender();
-    }
-    else if (g_openGLRenderSystem == renderSystemName) 
-    {
-        mNativeRender = new GLNativeRender();
-    } // init depend render system
-
     if (mNativeRender)
         mNativeRender->initRender();
 
@@ -104,18 +86,12 @@ CNativeRenderSystemRenderQueueListener::initNativeRender()
 void
 CNativeRenderSystemRenderQueueListener::releaseNativeRender()
 { 
-    if(mNativeRender)
-    { 
-        delete mNativeRender; 
-        mNativeRender = NULL;
-    } 
+    mNativeRender = NULL;
 }
 
 void 
 CNativeRenderSystemRenderQueueListener::renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation)
-{
-    return;
-
+{ 
 	// Set wanted render queue here - make sure there are - make sure that something is on
 	// this queue - else you will never pass this if.
     if (queueGroupId != Ogre::RENDER_QUEUE_MAIN) 
@@ -128,9 +104,9 @@ CNativeRenderSystemRenderQueueListener::renderQueueEnded(Ogre::uint8 queueGroupI
 	renderSystem->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
 
     // clear shader
-    if(renderSystem->isGpuProgramBound(Ogre::GPT_VERTEX_PROGRAM))
+    if (renderSystem->isGpuProgramBound(Ogre::GPT_VERTEX_PROGRAM))
         renderSystem->unbindGpuProgram(Ogre::GPT_VERTEX_PROGRAM);
-    if(renderSystem->isGpuProgramBound(Ogre::GPT_FRAGMENT_PROGRAM))
+    if (renderSystem->isGpuProgramBound(Ogre::GPT_FRAGMENT_PROGRAM))
         renderSystem->unbindGpuProgram(Ogre::GPT_FRAGMENT_PROGRAM);
     // assgin shader
     if (!mVertProg.isNull())
@@ -187,6 +163,9 @@ CDebugDrawer::CDebugDrawer(const Ogre::Camera* camera, Ogre::SceneManager* scene
 	    mRenderQueueListener = new CNativeRenderSystemRenderQueueListener(manObj, camera, sceneMgr, dynamicsWorld, mDebugDraw);
 	    sceneMgr->addRenderQueueListener(mRenderQueueListener);	
 
+        // Don't receive shadows
+        manObj->setCastShadows(false);
+
         // Set debugDrawer
         mDebugDraw->setDebugMode(btIDebugDraw::DBG_EnableCCD | btIDebugDraw::DBG_DrawWireframe);        
         dynamicsWorld->setDebugDrawer(static_cast<btIDebugDraw*>(mDebugDraw));
@@ -219,4 +198,17 @@ CDebugDrawer::~CDebugDrawer()
         delete mDebugDraw;
         mDebugDraw = NULL;
     }
+}
+
+
+void 
+CDebugDrawer::setEnable(bool enable)
+{
+    if (!mRenderQueueListener)
+        return;
+    
+    if (enable)
+        mSceneMgr->addRenderQueueListener(mRenderQueueListener);
+    else
+        mSceneMgr->removeRenderQueueListener(mRenderQueueListener);        
 }

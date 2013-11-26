@@ -1,7 +1,8 @@
 #ifndef D3D9_DEBUG_DRAWER_H
 #define D3D9_DEBUG_DRAWER_H
 
-#include "LinearMath/btIDebugDraw.h"
+#include "CNativeRenderQueueListener.h"
+#include "D3d9Stuff.h"
 #include <windows.h>
 
 // A structure for our custom vertex type
@@ -37,15 +38,30 @@ struct D3D9VERTEXBUFFER3 // for triangle
 
 #define SIZE_VERTEXBUFFER 4096
 //
-class D3d9DebugDrawer : public btIDebugDraw
+class D3d9DebugDrawer : public INativeRender
 {
 	int m_debugMode;
 
-public:
+protected:
+    LPDIRECT3DDEVICE9       m_pD3dDevice;
+	LPDIRECT3DVERTEXBUFFER9 m_pVB;
 
-	D3d9DebugDrawer();
+public:
+    /* ------------------------------------------------------------------
+     | interface of render state
+       ------------------------------------------------------------------ */
+    virtual void initRender();
+    virtual void preRender();
+    virtual void postRender();
+    
+public:
+    
+    D3d9DebugDrawer();
 	virtual ~D3d9DebugDrawer(); 
 
+    /* ------------------------------------------------------------------
+     | interface of btDebugDrawer
+       ------------------------------------------------------------------ */	
 	virtual void	drawLine(const btVector3& from,const btVector3& to,const btVector3& fromColor, const btVector3& toColor);
 
 	virtual void	drawLine(const btVector3& from,const btVector3& to,const btVector3& color);

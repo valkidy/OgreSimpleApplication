@@ -42,8 +42,9 @@ protected:
 public:
     COgreCharacterController(Ogre::Camera* cam) : 
         mCamera(cam),
+        mTimer(0.0f),
         m_character(NULL) { setupBody(cam->getSceneManager()); setupAnimations(); }
-    virtual ~COgreCharacterController() {}
+    virtual ~COgreCharacterController() { destroyCharacterController(); }
     
     void addTime(Ogre::Real deltaTime);
     void injectKeyDown(const OIS::KeyCode& iKeyCode);
@@ -53,6 +54,7 @@ public:
     void createCharacterController(btDynamicsWorld* dynamicsWorld);
 
 protected:
+    void destroyCharacterController();
     void setupBody(Ogre::SceneManager* sceneMgr);
     void setupAnimations();
     void updateBody(Ogre::Real deltaTime);
@@ -72,6 +74,7 @@ private:
 
     AnimID mBaseAnimID;                   // current base (full- or lower-body) animation
 	AnimID mTopAnimID;                    // current top (upper-body) animation
+    Ogre::Real mTimer;
 
     // physic
     CCharacterController* m_character;

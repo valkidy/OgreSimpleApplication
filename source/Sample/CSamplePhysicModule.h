@@ -2,15 +2,6 @@
 
 #include "btBulletDynamicsCommon.h"
 
-#define ARRAY_SIZE_X 5
-#define ARRAY_SIZE_Y 5
-#define ARRAY_SIZE_Z 5
-
-#define SCALING 1.
-#define START_POS_X -5
-#define START_POS_Y 5
-#define START_POS_Z -3
-
 namespace Ogre
 {
     class SceneManager;
@@ -42,8 +33,7 @@ public:
         m_collisionConfiguration(NULL),
         m_dynamicsWorld(NULL),
         m_sceneMgr(NULL),
-        m_camera(NULL),
-        m_character(NULL) { init();}
+        m_camera(NULL) { init();}
     ~CBulletPhysicManager()  {release();}
 
     void simulate(double dt);
@@ -78,11 +68,8 @@ private:
     Ogre::SceneManager* m_sceneMgr;
     Ogre::Camera* m_camera;
 
-    // character controller
-    CCharacterController* m_character;
-
 public:
-    CCharacterController* getCharacter(){ return m_character;}
     btDynamicsWorld* getWorld(){return m_dynamicsWorld;}
-    
+    void enableDebug(bool enable);
 }; // End of CBulletPhysicManager
+
