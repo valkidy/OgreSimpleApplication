@@ -173,12 +173,12 @@ COgreApplication::Run()
 	
         m_dElapsedTime += deltaTime;
         
-        if (m_dElapsedTime<FRAMERATE)
-        {
-            DWORD dSleepTime = (DWORD)(FRAMERATE - m_dElapsedTime) * 1000;
-            Sleep(dSleepTime);
-            continue;
-        } // End if
+        //if (m_dElapsedTime<FRAMERATE)
+        //{
+        //    DWORD dSleepTime = (DWORD)(FRAMERATE - m_dElapsedTime) * 1000;
+        //    Sleep(dSleepTime);
+        //    continue;
+        //} // End if
 
         if (false == m_bRun)
             break;
@@ -190,7 +190,7 @@ COgreApplication::Run()
         updateOneFrame(elapsedTime);
 
         //render
-	    if (false == renderOneFrame(deltaTime)) 
+	    if (false == renderOneFrame(elapsedTime)) 
             break;
     }
 }

@@ -75,8 +75,9 @@ CCharacterController::setLinearVelocity(const btVector3& velocity, btScalar angl
 void
 CCharacterController::jump()
 {
-    m_character->setJumpSpeed(10.0f);
-    m_character->setGravity(10.0f);
+    //m_character->setFallSpeed(55.0f * 5.0f);
+    m_character->setJumpSpeed(50.0f);
+    m_character->setGravity(100.0f);
     m_character->jump();    
 }
 
