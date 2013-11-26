@@ -120,17 +120,56 @@ COgreCharacterController::updateBody(Ogre::Real deltaTime)
 
         m_character->jumping(btVector3(mDirection.x, mDirection.y, mDirection.z), deltaTime);
     }
+
+    if (mBaseAnimID == ANIM_JUMP_LOOP)
+	{
+        if (m_character->onGround())
+        {
+		    setBaseAnimation(ANIM_JUMP_END, true);
+            mTimer = 0;
+		}
+	}
 }
 
 void 
 COgreCharacterController::updateAnimation(Ogre::Real deltaTime)
 {
+    mTimer += deltaTime;
+
     Ogre::Real baseAnimSpeed = 1.0f;
     Ogre::Real topAnimSpeed = 1.0f;
-
-	// increment the current base and top animation times
+        	
+    // increment the current base and top animation times
 	if (mBaseAnimID != ANIM_NONE) mAnims[mBaseAnimID]->addTime(deltaTime * baseAnimSpeed);
 	if (mTopAnimID != ANIM_NONE) mAnims[mTopAnimID]->addTime(deltaTime * topAnimSpeed);
+
+    if (mBaseAnimID == ANIM_JUMP_START)
+	{
+		if (mTimer >= mAnims[mBaseAnimID]->getLength())
+		{
+			// takeoff animation finished, so time to leave the ground!
+			setBaseAnimation(ANIM_JUMP_LOOP, true);
+			// apply a jump acceleration to the character
+			//mVerticalVelocity = JUMP_ACCEL;
+		}
+	}
+	else if (mBaseAnimID == ANIM_JUMP_END)
+	{
+		if (mTimer >= mAnims[mBaseAnimID]->getLength())
+		{
+			// safely landed, so go back to running or idling
+            if (mKeyDirection == Ogre::Vector3::ZERO)
+			{
+				setBaseAnimation(ANIM_IDLE_BASE);
+				setTopAnimation(ANIM_IDLE_TOP);
+			}
+			else
+			{
+				setBaseAnimation(ANIM_RUN_BASE, true);
+				setTopAnimation(ANIM_RUN_TOP, true);
+			}
+		}
+	}
 }
 
 void 
@@ -216,6 +255,12 @@ COgreCharacterController::injectKeyUp(const OIS::KeyCode& iKeyCode)
 
     if (iKeyCode == OIS::KC_SPACE)
     {
+        mTimer = 0;
+
+        // jump if on ground
+		setBaseAnimation(ANIM_JUMP_START, true);
+		setTopAnimation(ANIM_NONE);
+
         if (m_character)
         {
             m_character->jump();

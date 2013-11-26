@@ -172,14 +172,14 @@ COgreApplication::Run()
         timeSinceLastFrame = timeAtThisFrame;
 	
         m_dElapsedTime += deltaTime;
-        
+/*        
         if (m_dElapsedTime<FRAMERATE)
         {
             DWORD dSleepTime = (DWORD)(FRAMERATE - m_dElapsedTime) * 1000;
             Sleep(dSleepTime);
             continue;
         } // End if
-
+*/
         if (false == m_bRun)
             break;
 

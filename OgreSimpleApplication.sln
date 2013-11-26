@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OgreSimpleApplication", "project\OgreSimpleApplication.vcproj", "{3BD789C1-8E12-48D1-B7AC-F98B15B0D4EA}"
 	ProjectSection(ProjectDependencies) = postProject
+		{1162B32A-F355-5C43-B0A5-8E30384EB671} = {1162B32A-F355-5C43-B0A5-8E30384EB671}
 		{219CA636-E4B1-524F-90FC-B6DCC55C9418} = {219CA636-E4B1-524F-90FC-B6DCC55C9418}
 		{D740158B-4B47-334D-852D-2939467FD8FC} = {D740158B-4B47-334D-852D-2939467FD8FC}
 		{36081FE6-6D66-4B49-A2B4-F39B73D18226} = {36081FE6-6D66-4B49-A2B4-F39B73D18226}
@@ -13,6 +14,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletCollision", "..\bullet-2.81-rev2613\build\vs2008\BulletCollision.vcproj", "{D740158B-4B47-334D-852D-2939467FD8FC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletDynamics", "..\bullet-2.81-rev2613\build\vs2008\BulletDynamics.vcproj", "{36081FE6-6D66-4B49-A2B4-F39B73D18226}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletSoftBody", "..\bullet-2.81-rev2613\build\vs2008\BulletSoftBody.vcproj", "{1162B32A-F355-5C43-B0A5-8E30384EB671}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +39,10 @@ Global
 		{36081FE6-6D66-4B49-A2B4-F39B73D18226}.Debug|Win32.Build.0 = Debug|Win32
 		{36081FE6-6D66-4B49-A2B4-F39B73D18226}.Release|Win32.ActiveCfg = Release|Win32
 		{36081FE6-6D66-4B49-A2B4-F39B73D18226}.Release|Win32.Build.0 = Release|Win32
+		{1162B32A-F355-5C43-B0A5-8E30384EB671}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1162B32A-F355-5C43-B0A5-8E30384EB671}.Debug|Win32.Build.0 = Debug|Win32
+		{1162B32A-F355-5C43-B0A5-8E30384EB671}.Release|Win32.ActiveCfg = Release|Win32
+		{1162B32A-F355-5C43-B0A5-8E30384EB671}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

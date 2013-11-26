@@ -92,6 +92,12 @@ CCharacterController::jumping(const btVector3& direction, btScalar timeInterval)
          m_character->setVelocityForTimeInterval(direction, timeInterval);
 }
 
+bool
+CCharacterController::onGround()
+{
+    return m_character->onGround();
+}
+
 const btTransform& 
 CCharacterController::getWorldTransform()
 {

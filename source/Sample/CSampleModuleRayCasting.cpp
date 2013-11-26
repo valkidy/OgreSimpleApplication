@@ -17,11 +17,13 @@ CSampleModuleRayCasting::createScene()
     LOG("CSampleModuleRayCasting::createScene");  
 
     // set shadow properties
+    /*
     m_pSceneMgr->setShadowColour(Ogre::ColourValue(0.5, 0.5, 0.5));
 	m_pSceneMgr->setShadowTextureSize(1024);
 	m_pSceneMgr->setShadowTextureCount(1);
     m_pSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_MODULATIVE);
     m_pSceneMgr->setShadowUseInfiniteFarPlane(false);
+    */
 
     // use a small amount of ambient lighting
 	m_pSceneMgr->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
@@ -41,8 +43,8 @@ CSampleModuleRayCasting::createScene()
 
     m_pBulletPhysicManager = new CBulletPhysicManager();
 
-    m_Char = new COgreCharacterController(m_pCamera);
-    m_Char->createCharacterController(m_pBulletPhysicManager->getWorld());
+    //m_Char = new COgreCharacterController(m_pCamera);
+    //m_Char->createCharacterController(m_pBulletPhysicManager->getWorld());
 }
 
 void 

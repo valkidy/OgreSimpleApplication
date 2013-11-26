@@ -1,9 +1,12 @@
 #include "Win32Utility.h"
+#include "CSamplePhysicUtility.h"
 
 #include "OgreMath.h"
+
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
-#include "CSamplePhysicUtility.h"
+#include "BulletSoftBody/btSoftBodyHelpers.h"
+#include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 
 namespace btUtility
 {
@@ -384,8 +387,9 @@ buildHeightFieldTerrainFromImage(const Ogre::String& filename,
 bool
 buildGroundShape(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes)
 {
-    btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0), 1);
-    groundShape->setLocalScaling(btVector3(1,1,1));
+    btBoxShape* groundShape = new btBoxShape(btVector3(btScalar(150.0f),btScalar(1.0f),btScalar(150.0f)));
+    //btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0), 1);
+    //groundShape->setLocalScaling(btVector3(1,1,1));
 
     btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0)));
     btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0,groundMotionState,groundShape,btVector3(0,0,0));
@@ -439,6 +443,10 @@ buildBoxShapeArray(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld,
 
     btScalar mass(1.f);	
     btVector3 localInertia(0,0,0);	
+    btBoxShape* colShape = new btBoxShape(btVector3(scale, scale, scale));
+    btAssert(colShape);    
+    colShape->calculateLocalInertia(mass,localInertia);
+    collisionShapes.push_back(colShape);
 
     float start_x = - array_size.getX()/2;
     float start_y = array_size.getY();
@@ -456,23 +464,19 @@ buildBoxShapeArray(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld,
 								    btScalar(20+2.0*k + start_y),
 								    btScalar(2.0*j + start_z)));
 
-                btBoxShape* colShape = new btBoxShape(btVector3(scale, scale, scale));
-                btAssert(colShape);
-                colShape->calculateLocalInertia(mass,localInertia);
-                collisionShapes.push_back(colShape);
-
 			    //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 			    btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
 			    btRigidBody* body = new btRigidBody(rbInfo);
-                
+                body->setContactProcessingThreshold(BT_LARGE_FLOAT);
+
                 if (sceneMgr)
                 {
                     Ogre::Entity* ent = sceneMgr->createEntity("ent_" + Ogre::StringConverter::toString(index++),"Barrel.mesh");
 
                     Ogre::SceneNode* node = sceneMgr->getRootSceneNode()->createChildSceneNode("node_box_" + Ogre::StringConverter::toString(index++));
                     node->attachObject(ent);
-                    node->setPosition(2.0*i + start_x, 20+2.0*k + start_y, 2.0*j + start_z);
+                    node->setPosition(startTransform.getOrigin().getX(), startTransform.getOrigin().getY(), startTransform.getOrigin().getZ());
 
                     const Ogre::AxisAlignedBox& aabb = ent->getBoundingBox();
                     const Ogre::Vector3& boxScale = (aabb.getMaximum() - aabb.getMinimum())/2.0f;
@@ -481,13 +485,48 @@ buildBoxShapeArray(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld,
                     body->setUserPointer((void*)node);
                 }
 
-
-				
 			    dynamicsWorld->addRigidBody(body);
 		    }
 	    }		
     }
 
+    return true;
+}
+
+bool
+buildSticks(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btSoftBodyWorldInfo &softBodyWorldInfo)
+{
+    const int		n=12;
+	const int		sg=1;
+	const btScalar	sz=5;
+	const btScalar	hg=4;
+	const btScalar	in=1/(btScalar)(n-1);
+    
+	for(int y=0;y<n;++y)
+	{
+		for(int x=0;x<n;++x)
+		{
+			const btVector3	org(-sz+sz*2*x*in,
+				1,
+				-sz+sz*2*y*in-25);
+			btSoftBody*		psb=btSoftBodyHelpers::CreateRope(softBodyWorldInfo, org,
+				org+btVector3(hg*0.001,hg,0),
+				sg,
+				1);
+			psb->m_cfg.kDP		=	0.005;
+			psb->m_cfg.kCHR		=	0.1;
+			for(int i=0;i<3;++i)
+			{
+				psb->generateBendingConstraints(2+i);
+			}
+			psb->setMass(1,0);
+			psb->setTotalMass(0.01);
+            
+            ((btSoftRigidDynamicsWorld*)dynamicsWorld)->addSoftBody(psb);
+            //static_cast<btSoftRigidDynamicsWorld*>(dynamicsWorld)->addSoftBody(psb);			
+		}
+	}
+       
     return true;
 }
 

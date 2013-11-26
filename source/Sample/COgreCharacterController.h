@@ -42,6 +42,7 @@ protected:
 public:
     COgreCharacterController(Ogre::Camera* cam) : 
         mCamera(cam),
+        mTimer(0.0f),
         m_character(NULL) { setupBody(cam->getSceneManager()); setupAnimations(); }
     virtual ~COgreCharacterController() { destroyCharacterController(); }
     
@@ -73,6 +74,7 @@ private:
 
     AnimID mBaseAnimID;                   // current base (full- or lower-body) animation
 	AnimID mTopAnimID;                    // current top (upper-body) animation
+    Ogre::Real mTimer;
 
     // physic
     CCharacterController* m_character;
