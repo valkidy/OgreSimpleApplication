@@ -12,13 +12,16 @@
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 #include "BulletDynamics/Character/btKinematicCharacterController.h"
 
-// soft rigid body
+// soft body
 #include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 
 #include "Win32Utility.h"
 
+#include "CGrass.h"
+
 btSoftBodyWorldInfo m_softBodyWorldInfo;
+static Ogre::StaticGeometry* mField = NULL;
 
 void
 CBulletPhysicManager::init()
@@ -75,9 +78,11 @@ CBulletPhysicManager::init()
     // build some regidBody
     //btScalar* data;
     //btUtility::buildHeightFieldTerrainFromImage("terrain257x257.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
-    btUtility::buildBoxShapeArray(m_sceneMgr, m_dynamicsWorld, m_collisionShapes, btVector3(2,2,2));
+    btUtility::buildBoxShapeArray(m_sceneMgr, m_dynamicsWorld, m_collisionShapes, btVector3(1,1,1), 2.5f);
     btUtility::buildGroundShape(m_sceneMgr, m_dynamicsWorld, m_collisionShapes);
     
+    
+
     //btTriangleIndexVertexArray* triMesh;
     //btUtility::buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, (void* &)triMesh);
     //m_triangleMeshes.push_back(triMesh);
@@ -93,7 +98,7 @@ CBulletPhysicManager::init()
     m_softBodyWorldInfo.water_normal = btVector3(0, 0, 0);
 
     btUtility::buildSticks(m_sceneMgr, m_dynamicsWorld, m_softBodyWorldInfo);
-
+    Grass::buildGrass(m_sceneMgr, mField, m_dynamicsWorld);
 /////////////////////////////////////////////////////////	
 }
 
@@ -170,6 +175,7 @@ CBulletPhysicManager::simulate(double dt)
         m_softBodyWorldInfo.m_sparsesdf.GarbageCollect();
 #endif
         
+        /// Collision Objects
         int numCollisionObjects = m_dynamicsWorld->getNumCollisionObjects();
         for (int i=0;i<numCollisionObjects;++i)
         {
@@ -189,6 +195,84 @@ CBulletPhysicManager::simulate(double dt)
                 node->setPosition(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
                 node->setOrientation(trans.getRotation().getW(), trans.getRotation().getX(), trans.getRotation().getY(), trans.getRotation().getZ());
             }
+        }
+
+
+        if (mField)
+        {           
+            /*
+             | draw face
+             | http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Soft_Body_Rendering
+             */
+            int iter = 0;
+            StaticGeometry::RegionIterator regs =  mField->getRegionIterator();               
+            if (regs.hasMoreElements())
+            {
+                StaticGeometry::Region* reg = regs.getNext();
+                StaticGeometry::Region::LODIterator lods = reg->getLODIterator();
+		        while (lods.hasMoreElements())
+		        {
+                    ++iter;
+
+			        StaticGeometry::LODBucket::MaterialIterator mats = lods.getNext()->getMaterialIterator();
+                    const btSoftBodyArray& softBodyArray = ((btSoftRigidDynamicsWorld*)m_dynamicsWorld)->getSoftBodyArray();
+                    int numSoftBodys = softBodyArray.size();
+                    //for (int i=numSoftBodys-1;i>0;--i)
+                    for (int i=0;i<numSoftBodys;++i)
+                    {
+                        int linksize = softBodyArray[i]->m_links.size();
+                        int facesize = softBodyArray[i]->m_faces.size();
+                        btSoftBody::tFaceArray& faces(softBodyArray[i]->m_faces);
+
+                        const btSoftBody::Link& l = softBodyArray[i]->m_links[0];
+                        const btSoftBody::Link& l2 = softBodyArray[i]->m_links[linksize-1];
+                        const btVector3& rot = l.m_n[1]->m_x - l.m_n[0]->m_x;
+                        const btVector3& rot2 = l2.m_n[1]->m_x - l2.m_n[0]->m_x;
+                        const btVector3& rot3 = l2.m_n[1]->m_x - l.m_n[0]->m_x;
+                        const btVector3& rot4 = l2.m_n[1]->m_x - l.m_n[1]->m_x;
+
+                        const btVector3& pos = softBodyArray[i]->m_pose.m_pos;
+                        softBodyArray[i]->m_nodes[0].m_leaf
+                        Ogre::Vector4 offset(-rot4.getX(), 0, rot4.getY(), 0);				
+                        
+                        //Ogre::SubEntity* subEntity = static_cast<Ogre::SubEntity*>(softBodyArray[i]->getUserPointer());
+                        //if (subEntity)
+                        //    subEntity->setCustomParameter(999, offset);
+                        
+                        if (mats.hasMoreElements())
+			            {
+                            
+                            //++iter;
+                            
+                            StaticGeometry::MaterialBucket::GeometryIterator geoms = mats.getNext()->getGeometryIterator();                        
+                            while (geoms.hasMoreElements()) 
+                            {
+                                //++iter;
+
+                                geoms.getNext()->setCustomParameter(999, offset);
+                            }
+			            }
+                    } // End for
+		        }
+            } // End if
+
+/*
+            /// SoftBody
+            const btSoftBodyArray& softBodyArray = ((btSoftRigidDynamicsWorld*)m_dynamicsWorld)->getSoftBodyArray();
+            int numSoftBodys = softBodyArray.size();
+            for (int i=0;i<numSoftBodys;++i)
+            {
+                //int nodes_size = softBodyArray[i]->m_nodes.size();
+                //const btVector3& rot = softBodyArray[i]->m_nodes[nodes_size-1].m_n;
+                //Ogre::Vector4 offset(rot.getX(), 0, rot.getY(), 0);
+
+                int linksize = softBodyArray[i]->m_links.size();
+                const btSoftBody::Link& l = softBodyArray[i]->m_links[0];
+                const btSoftBody::Link& l2 = softBodyArray[i]->m_links[linksize-1];
+                const btVector3& rot = l2.m_n[0]->m_x - l.m_n[0]->m_x;
+                Ogre::Vector4 offset(rot.getX(), 0, rot.getY(), 0);				              
+            } // End for
+*/
         }
     }
 } 

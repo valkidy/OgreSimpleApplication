@@ -233,6 +233,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\source\Sample\CGrass.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CGrass.h"
+				>
+			</File>
+			<File
 				RelativePath="..\source\Sample\CNativeRenderQueueListener.cpp"
 				>
 			</File>

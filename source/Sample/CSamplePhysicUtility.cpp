@@ -498,7 +498,7 @@ buildSticks(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btSoft
 {
     const int		n=16;
 	const int		sg=4;
-	const btScalar	sz=15;
+	const btScalar	sz=30;
 	const btScalar	hg=4;
 	const btScalar	in=1/(btScalar)(n-1);
     

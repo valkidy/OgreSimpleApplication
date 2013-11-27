@@ -1,0 +1,48 @@
+material Examples/GrassBlades
+{
+    transparency_casts_shadows on
+    receive_shadows on
+	// Vertex program waving grass    
+    technique
+    {
+        pass
+        {
+			vertex_program_ref Examples/GrassWaverVp
+			{
+			} 
+			fragment_program_ref Examples/GrassWaverFp
+			{
+			}
+            
+			alpha_rejection greater 150 
+			scene_blend alpha_blend
+
+		    cull_hardware none
+            cull_software none
+            
+            texture_unit
+            {
+				tex_address_mode clamp
+                texture gras_02.png 
+            }
+        }
+    }
+    // fallback
+    technique
+    {
+        pass
+        {
+			alpha_rejection greater 150 
+			scene_blend alpha_blend
+            
+		    cull_hardware none
+            cull_software none
+            
+            texture_unit
+            {
+				tex_address_mode clamp
+                texture gras_02.png 
+            }
+        }
+    }
+}
