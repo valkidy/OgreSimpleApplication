@@ -222,36 +222,49 @@ CBulletPhysicManager::simulate(double dt)
                     {
                         int linksize = softBodyArray[i]->m_links.size();
                         int facesize = softBodyArray[i]->m_faces.size();
-                        btSoftBody::tFaceArray& faces(softBodyArray[i]->m_faces);
+                        //btSoftBody::tFaceArray& faces(softBodyArray[i]->m_faces);
 
-                        const btSoftBody::Link& l = softBodyArray[i]->m_links[0];
-                        const btSoftBody::Link& l2 = softBodyArray[i]->m_links[linksize-1];
-                        const btVector3& rot = l.m_n[1]->m_x - l.m_n[0]->m_x;
-                        const btVector3& rot2 = l2.m_n[1]->m_x - l2.m_n[0]->m_x;
-                        const btVector3& rot3 = l2.m_n[1]->m_x - l.m_n[0]->m_x;
-                        const btVector3& rot4 = l2.m_n[1]->m_x - l.m_n[1]->m_x;
+                        btVector3 rot0(0,0,0);
+                        for(int k=0;k<softBodyArray[i]->m_links.size();++k)
+			            {
+				            const btSoftBody::Link&	l=softBodyArray[i]->m_links[k];
+				            rot0 += l.m_n[1]->m_x-l.m_n[0]->m_x;				            
+			            }
 
-                        const btVector3& pos = softBodyArray[i]->m_pose.m_pos;
-                        softBodyArray[i]->m_nodes[0].m_leaf
-                        Ogre::Vector4 offset(-rot4.getX(), 0, rot4.getY(), 0);				
+                        //const btSoftBody::Link& l = softBodyArray[i]->m_links[0];
+                        //const btSoftBody::Link& l2 = softBodyArray[i]->m_links[linksize-1];
+                        //const btVector3& rot = l.m_n[1]->m_x - l.m_n[0]->m_x;
+                        //const btVector3& rot2 = l2.m_n[1]->m_x - l2.m_n[0]->m_x;
+                        //const btVector3& rot3 = l2.m_n[1]->m_x - l.m_n[0]->m_x;
+                        //const btVector3& rot4 = l2.m_n[1]->m_x - l.m_n[1]->m_x;
+
+                        //const btVector3& pos = softBodyArray[i]->m_pose.m_pos;
+                        //softBodyArray[i]->m_nodes[0].m_leaf;
+                        Ogre::Vector4 offset(-rot0.getX(), -rot0.getY(), -rot0.getZ(), 0);				
                         
-                        //Ogre::SubEntity* subEntity = static_cast<Ogre::SubEntity*>(softBodyArray[i]->getUserPointer());
-                        //if (subEntity)
-                        //    subEntity->setCustomParameter(999, offset);
+                        Ogre::SubEntity* subEntity = static_cast<Ogre::SubEntity*>(softBodyArray[i]->getUserPointer());
+                        if (subEntity)
+                        {
+                            const std::string& materialName = subEntity->getMaterialName();
+                            //Ogre::RenderOperation op;
+                            subEntity->setCustomParameter(999, offset);                                
+                            //op.srcRenderable
+                        }
                         
                         if (mats.hasMoreElements())
 			            {
                             
-                            //++iter;
+                            ++iter;
                             
                             StaticGeometry::MaterialBucket::GeometryIterator geoms = mats.getNext()->getGeometryIterator();                        
-                            while (geoms.hasMoreElements()) 
+                            if (geoms.hasMoreElements()) 
                             {
-                                //++iter;
+                                ++iter;
 
-                                geoms.getNext()->setCustomParameter(999, offset);
+                                Ogre::Renderable* rend = geoms.getNext();
+                                rend->setCustomParameter(999, offset);
                             }
-			            }
+			            }                        
                     } // End for
 		        }
             } // End if

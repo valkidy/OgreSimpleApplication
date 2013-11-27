@@ -47,21 +47,21 @@ namespace Grass
 		    for(int x=0;x<n;++x)
 		    {
                 Ogre::Entity* grass = mSceneMgr->createEntity("Grass" + Ogre::StringConverter::toString(index), "grass");
-                //const Ogre::MaterialPtr& mat = Ogre::MaterialManager::getSingleton().getByName("Examples/GrassBlades");
-                //grass->getSubEntity(0)->setMaterial(mat->clone("GrassCopy" + Ogre::StringConverter::toString(index)));
+                const Ogre::MaterialPtr& mat = Ogre::MaterialManager::getSingleton().getByName("Examples/GrassBlades");
+                grass->getSubEntity(0)->setMaterial(mat->clone("GrassCopy" + Ogre::StringConverter::toString(index)));
 				//Vector3 pos(x + Math::RangeRandom(-7, 7), 0, z + Math::RangeRandom(-7, 7));
                 Vector3 pos(-sz+sz*2*x*in, 1, -sz+sz*2*y*in);
 
 				//Quaternion ori(Degree(Math::RangeRandom(0, 359)), Vector3::UNIT_Y);
                 Quaternion ori(Degree(0), Vector3::UNIT_Y);
 				Vector3 scale(1, Math::RangeRandom(0.85, 1.15), 1);
-
-				mField->addEntity(grass, pos, ori, scale);
-
+                
                 if (index < numSoftBodys)
                 {
                     softBodyArray[index]->setUserPointer((void*)(grass->getSubEntity(0)));
                 }
+
+				mField->addEntity(grass, pos, ori, scale);
 
                 ++index;
 			}
@@ -76,7 +76,7 @@ namespace Grass
 
 		// create a submesh with the grass material
 		SubMesh* sm = mesh->createSubMesh();
-		sm->setMaterialName("Examples/GrassBlades");
+		//sm->setMaterialName("Examples/GrassBlades");
 		sm->useSharedVertices = false;
 		sm->vertexData = OGRE_NEW VertexData();
 		sm->vertexData->vertexStart = 0;
