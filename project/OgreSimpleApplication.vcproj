@@ -233,14 +233,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\source\Sample\CGrass.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\source\Sample\CGrass.h"
-				>
-			</File>
-			<File
 				RelativePath="..\source\Sample\CNativeRenderQueueListener.cpp"
 				>
 			</File>
@@ -254,6 +246,14 @@
 			</File>
 			<File
 				RelativePath="..\source\Sample\COgreCharacterController.h"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CSampleGrassSticks.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\source\Sample\CSampleGrassSticks.h"
 				>
 			</File>
 			<File

@@ -43,8 +43,8 @@ CSampleModuleRayCasting::createScene()
 
     m_pBulletPhysicManager = new CBulletPhysicManager();
 
-    // m_Char = new COgreCharacterController(m_pCamera);
-    // m_Char->createCharacterController(m_pBulletPhysicManager->getWorld());
+    m_Char = new COgreCharacterController(m_pCamera);
+    m_Char->createCharacterController(m_pBulletPhysicManager->getWorld());
 }
 
 void 
