@@ -11,11 +11,9 @@
 
 // bullet
 #include "btBulletDynamicsCommon.h"
-#include "BulletSoftBody/btSoftBody.h"
 
 namespace btUtility
 {
-
 /*
  | utiltiy for convert Ogre::Vector3 to btVector3
 */
@@ -58,11 +56,5 @@ buildGroundShape(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, b
 bool
 buildBoxShapeArray(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btAlignedObjectArray<btCollisionShape*>& collisionShapes,
                    const btVector3& array_size = btVector3(5,5,5), btScalar scale=1.0f);
-
-/*
- | utiltiy for build bullet
- */
-bool
-buildSticks(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btSoftBodyWorldInfo &softBodyWorldInfo);
 
 }; // namespace

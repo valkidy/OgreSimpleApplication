@@ -493,41 +493,4 @@ buildBoxShapeArray(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld,
     return true;
 }
 
-bool
-buildSticks(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btSoftBodyWorldInfo &softBodyWorldInfo)
-{
-    const int		n=16;
-	const int		sg=4;
-	const btScalar	sz=30;
-	const btScalar	hg=4;
-	const btScalar	in=1/(btScalar)(n-1);
-    
-	for(int y=0;y<n;++y)
-	{
-		for(int x=0;x<n;++x)
-		{
-			const btVector3	org(-sz+sz*2*x*in,
-				1,
-				-sz+sz*2*y*in);
-			btSoftBody*		psb=btSoftBodyHelpers::CreateRope(softBodyWorldInfo, org,
-				org+btVector3(hg*0.001,hg,0),
-				sg,
-				1);
-			psb->m_cfg.kDP		=	0.005;
-			psb->m_cfg.kCHR		=	0.1;
-			for(int i=0;i<3;++i)
-			{
-				psb->generateBendingConstraints(2+i);
-			}
-			psb->setMass(1,0);
-			psb->setTotalMass(0.01);
-            
-            ((btSoftRigidDynamicsWorld*)dynamicsWorld)->addSoftBody(psb);
-            //static_cast<btSoftRigidDynamicsWorld*>(dynamicsWorld)->addSoftBody(psb);			
-		}
-	}
-       
-    return true;
-}
-
 }; // namespace

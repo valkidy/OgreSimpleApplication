@@ -19,8 +19,9 @@
 #include "Win32Utility.h"
 
 #include "CSampleGrassSticks.h"
+#include "CSampleBsp.h"
 
-btSoftBodyWorldInfo m_softBodyWorldInfo;
+static btSoftBodyWorldInfo m_softBodyWorldInfo;
 static btUtility::CGrassSticks mGrassSticks;
 
 void
@@ -79,10 +80,8 @@ CBulletPhysicManager::init()
     //btScalar* data;
     //btUtility::buildHeightFieldTerrainFromImage("terrain257x257.png", m_dynamicsWorld, m_collisionShapes, (void* &)data);
     btUtility::buildBoxShapeArray(m_sceneMgr, m_dynamicsWorld, m_collisionShapes, btVector3(1,1,1), 2.5f);
-    btUtility::buildGroundShape(m_sceneMgr, m_dynamicsWorld, m_collisionShapes);
-    
-    
-
+    //btUtility::buildGroundShape(m_sceneMgr, m_dynamicsWorld, m_collisionShapes);
+        
     //btTriangleIndexVertexArray* triMesh;
     //btUtility::buildRigidBodyFromOgreEntity(_pEntity, m_dynamicsWorld, m_collisionShapes, (void* &)triMesh);
     //m_triangleMeshes.push_back(triMesh);
@@ -97,12 +96,11 @@ CBulletPhysicManager::init()
     m_softBodyWorldInfo.water_offset = 0;
     m_softBodyWorldInfo.water_normal = btVector3(0, 0, 0);
 
-    mGrassSticks.buildGrassSticks(m_sceneMgr, m_dynamicsWorld, m_softBodyWorldInfo);
-    /*
-    btUtility::buildSticks(m_sceneMgr, m_dynamicsWorld, m_softBodyWorldInfo);
-    Grass::buildGrass(m_sceneMgr, mField, m_dynamicsWorld);
-    */
+    // mGrassSticks.buildGrassSticks(m_sceneMgr, m_dynamicsWorld, m_softBodyWorldInfo);        
 /////////////////////////////////////////////////////////	
+
+    btUtility::buildBsp("BspDemo.bsp", m_dynamicsWorld);
+/////////////////////////////////////////////////////////
 }
 
 void

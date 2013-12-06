@@ -5,6 +5,7 @@
 
 #include "CSamplePhysicUtility.h"
 
+using namespace Ogre;
 namespace btUtility
 {
 /*
@@ -98,14 +99,20 @@ CGrassSticks::createGrassMesh()
 	}
 
 	sm->indexData->indexBuffer->unlock();  // commit index changes
+
+    // update mesh AABB
+    Ogre::AxisAlignedBox aabb;
+    aabb.setExtents(-1,-1,-1,1,1,1);
+    mesh->_setBounds(aabb);
+
+    // Ogre::MeshSerializer serial;
+    // serial.exportMesh(mesh.getPointer(), "grass.mesh");
 }
 
 
 bool 
 CGrassSticks::buildGrassSticks(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btSoftBodyWorldInfo &softBodyWorldInfo)
-{
-    mField = NULL;
-
+{    
     // create our grass mesh, and create a grass entity from it
     if (!sceneMgr->hasEntity(GRASS_MESH_NAME))
     {
@@ -114,14 +121,11 @@ CGrassSticks::buildGrassSticks(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dy
 
     const int		n=16;
 	const int		sg=4;    
-	const btScalar	sz=24;
+	const btScalar	sz=16;
 	const btScalar	hg=4;
 	const btScalar	in=1/(btScalar)(n-1);
-    const int       pg=3;
+    int             index = 0;
 
-    static Ogre::StaticGeometry *field[n];
-
-    int index = 0;
 	for(int y=0;y<n;++y)
 	{
 		for(int x=0;x<n;++x)
@@ -130,65 +134,37 @@ CGrassSticks::buildGrassSticks(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dy
 				1,
 				-sz+sz*2*y*in);
 			btSoftBody*		psb=btSoftBodyHelpers::CreateRope(softBodyWorldInfo, org,
-				org+btVector3(hg*0.001,hg,0),
+				org+btVector3(hg*0.001f,hg,0),
 				sg,
 				1);
-			psb->m_cfg.kDP		=	0.005;
-			psb->m_cfg.kCHR		=	0.1;
+			psb->m_cfg.kDP		=	0.005f;
+			psb->m_cfg.kCHR		=	0.1f;
 			for(int i=0;i<3;++i)
 			{
 				psb->generateBendingConstraints(2+i);
 			}
 			psb->setMass(1,0);
-			psb->setTotalMass(0.01);
-                        
+			psb->setTotalMass(0.01f);
+                       
             static_cast<btSoftRigidDynamicsWorld*>(dynamicsWorld)->addSoftBody(psb);
-
-            // create a static geometry field, which we will populate with grass
-            field[ index ] = sceneMgr->createStaticGeometry("Field" + Ogre::StringConverter::toString( index ));
-            field[ index ]->setRegionDimensions(Ogre::Vector3(1000, 1000, 1000));
-            field[ index ]->setOrigin(Ogre::Vector3(0,0,0));
-            //field[ index ]->setOrigin(Ogre::Vector3(org.getX(), org.getY(), org.getZ()));
-
-            Ogre::Entity* grass = sceneMgr->createEntity("Grass" + Ogre::StringConverter::toString(index), "grass");
-                                    
-            for(int i=0;i<pg;++i)
-            {
-                for (int j=0;j<pg;++j)
-                {
-                    Ogre::Vector3 pos(org.getX()-pg/2+i, org.getY(), org.getZ()-pg/2+j);
-                    Ogre::Quaternion ori(Ogre::Degree(0), Vector3::UNIT_Y);
-			        Ogre::Vector3 scale(1, Math::RangeRandom(0.85, 1.15), 1);
-                                    
-			        field[ index ]->addEntity(grass, pos, ori, scale);                    
-                } // End for
-            } // End for
-
-            field[ index ]->build();
             
-            StaticGeometry::RegionIterator regs = field[ index ]->getRegionIterator();               
-            StaticGeometry::Region::LODIterator lods = regs.getNext()->getLODIterator();
-            StaticGeometry::LODBucket::MaterialIterator mats = lods.getNext()->getMaterialIterator();
-            StaticGeometry::MaterialBucket::GeometryIterator geoms = mats.getNext()->getGeometryIterator();            
-            psb->setUserPointer((void*)(geoms.getNext()));
-
-            ++index;
+            const Ogre::String& strIndex = Ogre::StringConverter::toString(index++);
+            Ogre::Entity* grass = sceneMgr->createEntity("Grass" + strIndex, GRASS_MESH_NAME);
+            Ogre::SceneNode* node = sceneMgr->getRootSceneNode()->createChildSceneNode("node_grass_" + strIndex
+                ,Ogre::Vector3(org.getX(), org.getY(), org.getZ())
+                ,Ogre::Quaternion(Ogre::Degree(0), Vector3::UNIT_Y));
+            node->attachObject(grass);
+            node->scale(1.0f, Ogre::Math::RangeRandom(0.85f, 1.15f), 1.0f);
+            node->setVisible(true);
+                                    
+            psb->setUserPointer((void*)(grass->getSubEntity(0)));
 		} // End for
 	} // End for
-       
-    // render queue group
-    sceneMgr->addRenderQueueListener(this);	
 
     dynamicsWorld->setInternalTickCallback(&CGrassSticks::simulationTickCallback);
-
-    mField = field;
-
+    
     return true;
 }
-
-
-void 
-CGrassSticks::renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation) {}
 
 void
 CGrassSticks::simulationTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep)
@@ -218,10 +194,54 @@ CGrassSticks::simulationTickCallback(btDynamicsWorld *dynamicsWorld, btScalar ti
             if (rend)
             {                
                 rend->setCustomParameter(999, offset);
-                //rend->setCustomParameter(666, pos);
             }
         }    
     } // End if
+}
+
+/**************************************************************************************
+ | build grass cluster using static geometry
+ **************************************************************************************/
+bool 
+CGrassSticks::buildStaticGrassSticks(Ogre::SceneManager* sceneMgr)
+{            
+    // create our grass mesh, and create a grass entity from it
+    if (!sceneMgr->hasEntity(GRASS_MESH_NAME))
+    {
+	    createGrassMesh();
+    } // End if
+
+    mField = sceneMgr->createStaticGeometry("GrassField");
+    mField->setRegionDimensions(Ogre::Vector3(1000, 1000, 1000));
+    mField->setOrigin(Ogre::Vector3(0,0,0));
+    
+    Ogre::Entity* ent = sceneMgr->createEntity("Grass", GRASS_MESH_NAME);
+
+    const int		n=16;
+	const int		sg=4;    
+	const btScalar	sz=16;
+	const btScalar	hg=4;
+	const btScalar	in=1/(btScalar)(n-1);
+    
+	for(int y=0;y<n;++y)
+	{
+		for(int x=0;x<n;++x)
+		{
+			const btVector3	org(-sz+sz*2*x*in,
+				1,
+				-sz+sz*2*y*in);
+
+            Ogre::Vector3 pos(org.getX(), org.getY(), org.getZ());
+            Ogre::Quaternion ori(Ogre::Degree(0), Vector3::UNIT_Y);
+            Ogre::Vector3 scale(1, Ogre::Math::RangeRandom(0.85f, 1.15f), 1);
+                            
+	        mField->addEntity(ent, pos, ori, scale);                    
+        } // End for
+    } // End for
+
+    mField->build();
+                
+    return true;
 }
 
 }; // namespace

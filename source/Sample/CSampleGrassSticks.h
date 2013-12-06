@@ -3,30 +3,25 @@
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 
 #include "COgreHeader.h"
-    using namespace Ogre;
     
 namespace btUtility
 {
     /*
-    | utiltiy for build bullet
+    | utiltiy for build bullet grass and ogre entity
     */
     class CGrassSticks
-        : public Ogre::RenderQueueListener
     {
     public:
         bool buildGrassSticks(Ogre::SceneManager* sceneMgr, btDynamicsWorld* dynamicsWorld, btSoftBodyWorldInfo &softBodyWorldInfo);
-    
+        bool buildStaticGrassSticks(Ogre::SceneManager* sceneMgr);
+
     protected:
         void createGrassMesh();
-
-        // interface
-        virtual void renderQueueStarted(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation) {}
-	    virtual void renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation);
         
         // interface
         static void simulationTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
         
-        Ogre::StaticGeometry** mField;
+        Ogre::StaticGeometry* mField;
         btDynamicsWorld* m_dynamicsWorld;
     }; // End of class   
 }; // namespace
