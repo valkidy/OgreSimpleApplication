@@ -249,14 +249,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\source\Sample\CSampleBsp.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\source\Sample\CSampleBsp.h"
-				>
-			</File>
-			<File
 				RelativePath="..\source\Sample\CSampleGrassSticks.cpp"
 				>
 			</File>
@@ -358,26 +350,6 @@
 			>
 			<File
 				RelativePath="..\source\Snippets\MemoryLeak.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Bsp"
-			>
-			<File
-				RelativePath="..\source\Bsp\BspConverter.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\source\Bsp\BspConverter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\source\Bsp\BspLoader.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\source\Bsp\BspLoader.h"
 				>
 			</File>
 		</Filter>
